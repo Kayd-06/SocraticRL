@@ -1,23 +1,34 @@
 """
-client.py - Remote environment client for SocraticRL.
+client.py — Remote HTTP client for the SocraticRL HuggingFace Space.
 
-Use this when the environment is deployed to HuggingFace Spaces and you
-want to run training from a local machine or Colab against the remote env.
+Use this when running training against the deployed remote environment
+instead of in-process. Wraps raw dict responses into typed SocraticObservation.
 """
+
+from __future__ import annotations
+from typing import Any
+
+from models import SocraticAction, SocraticObservation
 
 try:
     from openenv_core.client import HTTPEnvClient
 except ImportError:
     class HTTPEnvClient:
-        pass
-
-from models import SocraticAction, SocraticObservation
+        def __init__(self, base_url: str):
+            self.base_url = base_url
+        def reset(self): raise NotImplementedError("openenv_core not installed")
+        def step(self, action): raise NotImplementedError("openenv_core not installed")
 
 
 class SocraticClient(HTTPEnvClient):
     """
-    HTTP client that connects to the deployed SocraticRL HuggingFace Space.
-    Wraps raw dict responses into typed SocraticObservation objects.
+    Typed HTTP client for the deployed SocraticRL environment.
+
+    Usage:
+        client = SocraticClient()
+        obs = client.reset()
+        obs = client.step(SocraticAction(question="Why do you think mass matters here?"))
+        print(obs.understanding_score, obs.reward, obs.feedback)
     """
 
     DEFAULT_URL = "https://YOUR_USERNAME-socratic-rl.hf.space"
@@ -27,17 +38,14 @@ class SocraticClient(HTTPEnvClient):
 
     def reset(self) -> SocraticObservation:
         raw = super().reset()
-        return self._parse(raw)
+        return self._parse(raw if isinstance(raw, dict) else vars(raw))
 
     def step(self, action: SocraticAction) -> SocraticObservation:
-        payload = {"question": action.question, "reasoning": action.reasoning}
-        raw = super().step(payload)
-        return self._parse(raw)
+        raw = super().step(action)
+        return self._parse(raw if isinstance(raw, dict) else vars(raw))
 
     @staticmethod
-    def _parse(raw: dict) -> SocraticObservation:
-        if not isinstance(raw, dict):
-            raw = {}
+    def _parse(raw: dict[str, Any]) -> SocraticObservation:
         return SocraticObservation(
             student_response=raw.get("student_response", ""),
             understanding_score=float(raw.get("understanding_score", 0.0)),
@@ -50,18 +58,25 @@ class SocraticClient(HTTPEnvClient):
 
 
 if __name__ == "__main__":
-    # Quick connectivity test
-    # Instantiate client, reset, take 3 steps with a test question
-    # Print each observation
-    # This lets you verify the HF Space is live before running training
-    client = SocraticClient()
-    print("Connecting to:", client.DEFAULT_URL)
+    import os
+    url = os.environ.get("SOCRATIC_RL_URL", SocraticClient.DEFAULT_URL)
+    print(f"Connecting to: {url}")
+    client = SocraticClient(base_url=url)
+    print("Resetting...")
     obs = client.reset()
-    print("RESET:", obs)
-
-    test_question = "What would happen if you tested this in a controlled setup?"
-    for i in range(3):
-        obs = client.step(SocraticAction(question=test_question))
-        print(f"STEP {i + 1}:", obs)
+    print(f"Topic: {obs.topic}")
+    print(f"Student: {obs.student_response[:100]}")
+    questions = [
+        "What would happen if you dropped both objects in a vacuum?",
+        "Why do you think mass would affect how fast something falls?",
+        "If gravity gives the same acceleration to all objects, what does that mean for fall speed?",
+    ]
+    for q in questions:
+        print(f"\nAgent: {q}")
+        obs = client.step(SocraticAction(question=q))
+        print(f"Student: {obs.student_response[:100]}")
+        print(f"Understanding: {obs.understanding_score:.3f} | Reward: {obs.reward:+.3f}")
+        print(f"Feedback: {obs.feedback}")
         if obs.done:
+            print("Episode complete.")
             break

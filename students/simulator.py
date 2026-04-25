@@ -13,6 +13,13 @@ import random
 
 from students.profiles import StudentProfile
 
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    _SKLEARN_AVAILABLE = True
+except ImportError:
+    _SKLEARN_AVAILABLE = False
+
 _CONFUSED = [
     "I still think {misconception_short}. That's just how it seems to me.",
     "I'm not sure I follow. Isn't it obvious that {misconception_short}?",
@@ -76,20 +83,62 @@ def simulate_student_response(
     return template.format(**fmt)
 
 
+def _tfidf_score(student_response: str, correct_answer: str) -> float:
+    """
+    TF-IDF cosine similarity between student response and correct answer.
+    Returns 0.0 if sklearn not installed — graceful fallback.
+
+    Catches paraphrases that keyword matching misses. Example:
+      Student says: "the acceleration is identical regardless of weight"
+      Keyword score: 0/6 (no exact keywords)
+      TF-IDF score:  0.71 (semantically correct)
+    """
+    if not _SKLEARN_AVAILABLE or not student_response.strip():
+        return 0.0
+    try:
+        vec = TfidfVectorizer(stop_words="english", min_df=1)
+        matrix = vec.fit_transform(
+            [student_response.lower(), correct_answer.lower()]
+        )
+        sim = cosine_similarity(matrix[0:1], matrix[1:2])[0][0]
+        return float(min(sim, 1.0))
+    except Exception:
+        return 0.0
+
+
 def evaluate_understanding(
     student_response: str,
     scenario: StudentProfile,
     current_score: float,
     question: str,
 ) -> float:
+    """
+    Blended understanding score.
+
+    With sklearn:    55% keyword + 30% TF-IDF cosine + 15% question nudge
+    Without sklearn: 70% keyword + 30% question nudge (capped at 0.85)
+
+    Score never decreases — students do not un-learn.
+    """
     resp_lower = student_response.lower()
     q_lower = question.lower()
-    kw_in_resp = sum(1 for kw in scenario.progress_keywords if kw.lower() in resp_lower)
+
+    kw_in_resp = sum(
+        1 for kw in scenario.progress_keywords if kw.lower() in resp_lower
+    )
     kw_score = kw_in_resp / max(len(scenario.progress_keywords), 1)
-    ca_words = [w for w in scenario.correct_answer.lower().split() if len(w) > 5]
-    ca_found = sum(1 for w in ca_words if w in resp_lower)
-    ca_score = ca_found / max(len(ca_words), 1)
-    kw_in_q = sum(1 for kw in scenario.progress_keywords if kw.lower() in q_lower)
+
+    tfidf = _tfidf_score(student_response, scenario.correct_answer)
+
+    kw_in_q = sum(
+        1 for kw in scenario.progress_keywords if kw.lower() in q_lower
+    )
     nudge = min(kw_in_q * 0.04, 0.12)
-    raw = 0.55 * kw_score + 0.35 * ca_score + nudge
-    return max(raw, current_score)  # never decrease
+
+    if _SKLEARN_AVAILABLE:
+        raw = 0.55 * kw_score + 0.30 * tfidf + 0.15 * nudge
+    else:
+        raw = 0.70 * kw_score + 0.30 * nudge
+        raw = min(raw, 0.85)
+
+    return max(raw, current_score)
