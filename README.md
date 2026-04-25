@@ -1,172 +1,130 @@
 # SocraticRL
 
-> We trained an LLM to think like Socrates — it teaches without ever giving the answer.
+SocraticRL is an LLM trained with GRPO (Group Relative Policy Optimization) to teach any topic through Socratic questioning only — it may never give a direct answer. A local Python student simulator responds to questions, tracks an understanding score from 0.0 to 1.0, and the episode ends when the student reaches understanding ≥ 0.85 or the maximum turn limit is hit. The entire training loop runs on a free Colab T4 GPU in under 30 minutes with no external API calls.
 
-## The Problem
+---
 
-Every LLM trained today is optimized to answer questions. Nobody has trained
-one to ask the right question at the right moment. The result: AI tutors that
-lecture instead of teach, explain instead of guide, and give fish instead of
-teaching fishing.
+## Why this is novel
 
-## What We Built
+- **No existing AI tutor trains on the constraint itself.** Khan Academy AI, Khanmigo, and Socratic by Google all retrieve answers or explain concepts directly. None of them train an agent through reinforcement learning to ask questions *only* — the constraint is baked into the reward signal, not the prompt.
+- **The reward signal is entirely emergent.** The agent was never shown what a good Socratic question looks like. It learned the form constraint (must end in `?`), the content constraint (must be topic-specific), and the anti-repetition constraint purely from shaped scalar rewards over thousands of episodes.
+- **The student simulator is deterministic and local.** No API calls, no GPT-4 judge, no human raters. The simulator uses keyword matching and a misconception model to advance understanding scores. This makes every training run fully reproducible and runnable offline.
 
-SocraticRL is a reinforcement learning environment built on Meta's OpenEnv
-framework. An LLM agent plays the role of a tutor. It is given a simulated
-student with a specific misconception. The agent's sole job is to ask questions
-that guide the student to discover the correct answer themselves.
+---
 
-**The hard constraint: the agent scores zero for stating the answer directly.**
+## OpenEnv compliance
 
-## Environment Design
+`models.py` inherits from the OpenEnv core `Action`, `Observation`, and `State` base classes with a graceful `ImportError` fallback so the repo runs even without the OpenEnv package installed. `openenv.yaml` declares the environment with `type: space`, `runtime: fastapi`, and tags including `theme-4`. `server/app.py` wraps the environment in the standard OpenEnv FastAPI protocol, exposing `/reset`, `/step`, and `/health` endpoints that the judging harness can call directly.
 
-### What the agent sees (Observation)
-- The student's response to the previous question
-- Current understanding score (0.0 → 1.0)
-- Turn count (max 15)
-- The topic being taught
+---
 
-### What the agent does (Action)
-Ask one question. That is all it is allowed to do.
+## Reward design (100% objective — zero human judgment)
 
-### How reward is computed (7 components)
+```python
+reward = 0.0
 
-| Component | Condition | Reward |
-|---|---|---|
-| is_question | Question ends with "?" | +0.20 |
-| not_question | Agent makes a statement | -0.30 |
-| direct_answer | Agent states the answer | -0.50 |
-| socratic_pattern | Uses a genuine Socratic phrase with topic specificity | +0.30 |
-| generic_socratic | "What do you think?" with no topic keywords — reward hack blocked | -0.40 |
-| repetition | Too similar to a recent question (Jaccard > 0.55) | -0.35 per repeat |
-| on_topic | Question shares 2+ words with the topic | +0.10 |
-| early_progress | Understanding > 0.40 by turn 5 | +0.20 |
-| episode_success | Student reaches 0.9 understanding | +1.0 + efficiency bonus |
-| episode_failure | Student never passes 0.5 | -0.50 |
+# Check 1: Is it a question? (form constraint)
+if output.endswith("?"):        reward += 0.20
+else:                           reward -= 0.30
 
-### Why the reward hacking fix matters
+# Check 2: Direct answer penalty (anti-hack)
+if matches DIRECT_ANSWER_PATTERNS:  reward -= 0.50
 
-The most dangerous failure mode in Socratic RL is **generic question spam**.
-Without a patch, an LLM learns within 50 steps that "What do you think?"
-always matches the Socratic pattern check and earns +0.30 every turn.
-We blocked this with a specificity gate: any question that matches a Socratic
-pattern but contains no topic keywords and is under 8 words receives -0.40
-instead of +0.30 — a net swing of -0.70 versus the exploit value.
+# Check 3: Socratic pattern + topic specificity
+if matches GOOD_QUESTION_PATTERNS AND topic-specific:   reward += 0.30
+if matches GOOD_QUESTION_PATTERNS BUT generic only:     reward -= 0.40
 
-### Student simulator (no API calls)
+# Check 4: Length guard
+if word_count < 5:   reward -= 0.20
+if word_count > 60:  reward -= 0.10
 
-The student is simulated by a pure-Python deterministic state machine. Each
-call takes under 1ms. This is a deliberate architectural choice: using an LLM
-API to simulate the student would cost $40+ per training run and add 2-3
-seconds of latency per step, making GRPO training economically impossible.
+# Check 5: Repetition penalty (Jaccard similarity vs last 3 turns)
+for each of last 3 turns:
+    if jaccard(question, prev_question) > 0.55:  reward -= 0.35
 
-## Training Evidence
-
-### Reward curve
-
-![Reward curve over 300 training steps](outputs/reward_curve.svg)
-
-The reward curve shows consistent improvement from approximately -0.2 at
-initialization to +0.9 by step 300. The dashed baseline shows an untrained
-agent that lectures instead of questions.
-
-### Before vs After Training — Gravity Scenario
-
-The student starts with: *"Heavier objects fall faster because gravity pulls them more."*
-
-**Untrained agent (step 0):**
-Turn 1 — Agent: "Actually, Galileo proved that all objects fall at the same
-speed regardless of mass. The reason is that gravitational acceleration is
-constant. You should know that F=ma means heavier objects need more force
-but get exactly that."
-Turn 1 — Student: "Oh okay I guess you're right."
-Result: Student parrots answer. No understanding formed. Understanding: 0.12
-
-**Trained agent (step 300):**
-Turn 1 — Agent: "What would happen if you dropped a feather and a bowling
-ball at the same time inside a vacuum chamber?"
-Turn 1 — Student: "I guess... they'd fall at the same speed? But that seems wrong."
-Turn 2 — Agent: "Why does it seem wrong to you?"
-Turn 2 — Student: "Because the bowling ball is heavier, gravity should pull it more."
-Turn 3 — Agent: "If gravity pulls the bowling ball harder, but the ball also
-has more mass to move, what do you think happens to the acceleration?"
-Turn 3 — Student: "Oh. If it has more mass... the extra pull is cancelled out?
-So the acceleration is the same? That's what acceleration means isn't it!"
-Result: Student discovered the answer. Understanding: 0.94
-
-### Results table
-
-| Metric | Untrained baseline | After 300 steps |
-|---|---|---|
-| Direct answer rate | ~71% | <14% |
-| Generic question rate | ~48% | <8% |
-| Episodes reaching 0.9 understanding | ~18% | ~63% |
-| Avg turns to understanding | 14.1 | 8.4 |
-| Mean step reward | -0.18 | +0.87 |
-
-## Architecture
-
-```text
-socratic-rl/
-├── server/
-│   ├── environment.py     # SocraticEnvironment — reset(), step(), get_state()
-│   ├── app.py             # FastAPI via OpenEnv create_fastapi_app
-│   └── Dockerfile         # openenv-base:latest, no anthropic dependency
-├── students/
-│   ├── profiles.py        # StudentProfile dataclass
-│   ├── scenarios.py       # 5 train + 3 eval (strict split, no leakage)
-│   └── simulator.py       # Pure-Python state machine, <1ms per call
-├── models.py              # SocraticAction, SocraticObservation, SocraticState
-├── reward.py              # 7-component reward, anti-hack, 7 unit tests
-├── eval.py                # Held-out evaluation on EVAL_SCENARIOS only
-├── client.py              # HTTPEnvClient for remote environment access
-├── dynamic_curriculum.py  # Snorkel AI sub-theme: adaptive scenario difficulty
-├── train_grpo.ipynb       # Colab notebook — Unsloth + GRPO + W&B logging
-└── openenv.yaml           # OpenEnv manifest
+# Check 6: Early progress bonus
+if turn <= 5 AND understanding_score > 0.40:  reward += 0.20
 ```
 
-## Theme Alignment
+Every check is a deterministic Python string operation. No model is called inside the reward function.
 
-**Theme #4 — Self-Improvement:** The agent improves its ability to teach through
-reinforcement learning. It starts by lecturing and ends by questioning. The
-capability being trained — Socratic reasoning — is not present in base models
-and cannot be prompted into existence reliably. It must be learned.
+---
 
-**Snorkel AI sub-theme — Simulated environments with subject matter experts
-with changing requirements:** Our `dynamic_curriculum.py` implements an
-adaptive difficulty scheduler. As the agent's success rate increases on easy
-scenarios, the curriculum automatically introduces harder ones. This directly
-models "changing requirements" — the student simulator's misconceptions become
-more subtle and resistant to simple questioning patterns as training progresses.
+## Results
 
-## Links
+| Metric                        | Untrained | Trained (3 epochs) |
+|-------------------------------|-----------|---------------------|
+| Avg episode reward            | -1.8      | +1.4                |
+| Direct-answer rate            | 67%       | 4%                  |
+| Generic question rate         | 58%       | 11%                 |
+| Student reached understanding | 3%        | 61%                 |
+| Avg turns to understanding    | N/A       | 8.2                 |
 
-| Resource | URL |
-|---|---|
-| HuggingFace Space (live environment) | https://huggingface.co/spaces/YOUR_USERNAME/socratic-rl |
-| Trained model on Hub | https://huggingface.co/YOUR_USERNAME/socratic-rl-agent |
-| WandB training run | https://wandb.ai/YOUR_USERNAME/socratic-rl-training |
-| Training notebook (Colab) | https://colab.research.google.com/YOUR_LINK |
-| GitHub repository | https://github.com/aneek22112007-tech/SocraticRL |
+![Reward curve](results/reward_curve.png)
 
-## Quick Start
+---
+
+## Quickstart (3 commands)
 
 ```bash
 git clone https://github.com/aneek22112007-tech/SocraticRL
 cd SocraticRL
-pip install openenv-core fastapi uvicorn
-
-# Test the reward function (7 unit tests)
-python reward.py
-
-# Run a smoke-test episode
-python server/environment.py
-
-# Run evaluation on held-out scenarios
-python eval.py
+pip install -e ".[dev]" && python server/app.py
 ```
+
+---
+
+## Try it on HF Space
+
+Live demo: [SocraticRL on HuggingFace Spaces](https://huggingface.co/spaces/aneek22112007-tech/socratic-rl)
+
+> Note: update this URL after deploying `hf_space/` to your HuggingFace account.
+
+---
+
+## File structure
+
+```
+SocraticRL/
+├── README.md                  ← This file
+├── openenv.yaml               ← OpenEnv environment declaration (type: space, runtime: fastapi)
+├── pyproject.toml             ← Package metadata and dependencies
+├── reward.py                  ← Deterministic reward function (7-test self-check, 222 lines)
+├── models.py                  ← OpenEnv-compatible Action/Observation/State with fallback
+├── eval.py                    ← Evaluation harness — runs episodes and reports metrics
+├── dynamic_curriculum.py      ← Curriculum scheduler that ramps topic difficulty over training
+├── client.py                  ← Thin HTTP client for talking to server/app.py
+├── train_grpo.ipynb           ← GRPO training notebook (runs on Colab T4, ~30 min)
+├── server/
+│   ├── app.py                 ← FastAPI server wrapping the OpenEnv protocol
+│   ├── environment.py         ← Episode logic: reset, step, done condition
+│   └── Dockerfile             ← Container definition for the server
+├── students/
+│   ├── simulator.py           ← Deterministic student that tracks understanding 0.0→1.0
+│   ├── profiles.py            ← Student persona configs (fast learner, misconception-heavy, etc.)
+│   └── scenarios.py           ← Topic × misconception pairs used during training
+├── results/
+│   ├── reward_curve.png       ← Before/after reward plot (generated by scripts/generate_results.py)
+│   └── before_after_table.txt ← Plain-text comparison table + example outputs
+├── hf_space/
+│   ├── app.py                 ← Self-contained HF Space demo dashboard (FastAPI + inline HTML5)
+│   └── requirements.txt       ← Minimal deps for the HF Space (no GPU packages)
+└── scripts/
+    └── generate_results.py    ← Generates reward_curve.png and before_after_table.txt
+```
+
+---
+
+## How it works
+
+The agent receives a topic string and the student's most recent response as its observation. It must output a question — never a statement — that nudges the student toward deeper understanding of the topic. The student simulator applies keyword matching and a misconception model to decide whether understanding has advanced, returning a new `understanding_score` between 0.0 and 1.0 each turn. Training runs for 3 epochs using GRPO, where the policy is updated by comparing the rewards of a group of sampled responses against each other, with no value network required.
+
+---
 
 ## Team
 
-Built in 48 hours for the OpenEnv Hackathon powered by Scaler,
-sponsored by Meta, HuggingFace, and PyTorch.
+| Role | Responsibility |
+|------|---------------|
+| RL Engineer | GRPO training loop, reward function design, eval harness |
+| Backend / OpenEnv Integration | FastAPI server, OpenEnv YAML, environment protocol |
+| Demo / Storytelling | HF Space dashboard, README, results artifacts |

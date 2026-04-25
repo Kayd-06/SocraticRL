@@ -183,6 +183,11 @@ class SocraticEnvironment(Environment):
     def get_state(self) -> SocraticState:
         return self._state
 
+    @property
+    def state(self) -> SocraticState:
+        """Compatibility property for openenv_core abstract interface."""
+        return self._state
+
     def run_episode(self, questions: list) -> dict:
         """Scripted episode for smoke-testing. Returns episode summary dict."""
         obs = self.reset()

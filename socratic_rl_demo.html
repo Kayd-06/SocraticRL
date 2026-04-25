@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocraticRL · Cinematic Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0A0F;--surface:#12121A;--border:rgba(255,255,255,0.06);
+  --accent:#7F77DD;--teal:#1D9E75;--coral:#D85A30;
+  --text:#F0EFFF;--muted:#8884A8;
+  --agent-bg:#1A1830;--student-bg:#0D2420;
+}
+body{
+  font-family:system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow:hidden;height:100vh;
+  font-variant-numeric:tabular-nums;
+}
+.progress-bar{
+  position:fixed;top:0;left:0;height:2px;
+  background:var(--teal);width:0%;
+  transition:width 400ms ease-out;z-index:9999;
+}
+.layout{
+  display:grid;
+  grid-template-columns:240px 1fr 320px;
+  height:100vh;
+}
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:24px 16px;
+}
+.logo{
+  font-size:18px;font-weight:600;
+  color:var(--accent);
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:32px;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--teal);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.4;transform:scale(0.8)}
+}
+.nav{display:flex;flex-direction:column;gap:4px;margin-bottom:32px}
+.nav-pill{
+  padding:8px 12px;border-radius:6px;
+  font-size:13px;font-weight:500;
+  cursor:pointer;transition:all 150ms;
+  border:1px solid transparent;
+}
+.nav-pill.active{
+  background:var(--accent);color:var(--text);
+}
+.nav-pill:not(.active){
+  color:var(--muted);
+}
+.nav-pill:not(.active):hover{
+  background:rgba(127,119,221,0.08);
+  color:var(--text);
+}
+.section-header{
+  font-size:11px;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--muted);
+  margin-bottom:12px;font-weight:600;
+}
+.scenario-list{display:flex;flex-direction:column;gap:6px;flex:1}
+.scenario-card{
+  padding:10px 12px;border-radius:6px;
+  font-size:12px;cursor:pointer;
+  border-left:2px solid transparent;
+  background:rgba(255,255,255,0.02);
+  transition:all 150ms;
+}
+.scenario-card.active{
+  border-left-color:var(--accent);
+  background:rgba(127,119,221,0.08);
+}
+.scenario-card:not(.active):hover{
+  background:rgba(255,255,255,0.04);
+}
+.version{
+  font-size:11px;color:var(--muted);
+  margin-top:auto;padding-top:16px;
+  border-top:1px solid var(--border);
+}
+/* ── MAIN ── */
+.main{
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.top-bar{
+  height:48px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 24px;
+}
+.scenario-title{
+  font-size:14px;font-weight:600;
+}
+.metrics-pills{
+  display:flex;gap:12px;
+}
+.metric-pill{
+  padding:6px 14px;border-radius:20px;
+  border:1px solid var(--border);
+  font-size:12px;font-weight:500;
+  display:flex;align-items:center;gap:6px;
+}
+.metric-value{
+  color:var(--accent);font-weight:600;
+}
+.content-area{
+  flex:1;overflow:auto;
+  padding:24px;
+}
+.view{display:none}
+.view.active{display:block}
+/* ── DEBATE VIEW ── */
+.debate-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;height:100%;
+}
+.chat-column{
+  display:flex;flex-direction:column;
+}
+.chat-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:16px;
+}
+.avatar{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.avatar-agent{background:var(--agent-bg);border:1px solid var(--accent)}
+.avatar-student{background:var(--student-bg);border:1px solid var(--teal)}
+.chat-header-text{font-size:13px;font-weight:600}
+.chat-messages{
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:16px;
+  padding-right:8px;
+}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-track{background:transparent}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.bubble{
+  padding:12px 16px;
+  font-size:14px;line-height:1.6;
+  animation:bubbleIn 280ms ease-out both;
+}
+@keyframes bubbleIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.bubble-agent{
+  background:var(--agent-bg);
+  border-left:2px solid var(--accent);
+  border-radius:0 12px 12px 12px;
+}
+.bubble-student{
+  background:var(--student-bg);
+  border-right:2px solid var(--teal);
+  border-radius:12px 0 12px 12px;
+}
+.reward-summary{
+  font-size:11px;color:var(--muted);
+  margin-top:6px;
+}
+.reward-summary .pos{color:var(--teal)}
+.reward-summary .neg{color:var(--coral)}
+.typing-indicator{
+  display:flex;gap:4px;
+  padding:12px 16px;
+  background:var(--agent-bg);
+  border-left:2px solid var(--accent);
+  border-radius:0 12px 12px 12px;
+  width:fit-content;
+}
+.typing-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:typingBounce 1s ease-in-out infinite;
+}
+.typing-dot:nth-child(2){animation-delay:0.15s}
+.typing-dot:nth-child(3){animation-delay:0.3s}
+@keyframes typingBounce{
+  0%,60%,100%{transform:translateY(0)}
+  30%{transform:translateY(-8px)}
+}
+.controls{
+  margin-top:16px;
+  display:flex;gap:10px;
+}
+.btn{
+  padding:0 20px;height:36px;
+  border:1px solid var(--accent);
+  background:transparent;color:var(--text);
+  border-radius:6px;font-size:13px;
+  font-weight:500;cursor:pointer;
+  transition:all 150ms;
+}
+.btn:hover:not(:disabled){
+  background:rgba(127,119,221,0.12);
+}
+.btn:active:not(:disabled){
+  transform:scale(0.97);
+}
+.btn:disabled{
+  opacity:0.4;cursor:not-allowed;
+}
+/* ── METRICS VIEW ── */
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;margin-bottom:24px;
+}
+.metric-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+}
+.metric-label{
+  font-size:12px;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted);
+  margin-bottom:8px;
+}
+.metric-stat{
+  font-size:32px;font-weight:700;
+  margin-bottom:8px;
+}
+.metric-delta{
+  font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:4px;
+  display:inline-block;
+}
+.delta-pos{background:rgba(29,158,117,0.12);color:var(--teal)}
+.delta-neg{background:rgba(216,90,48,0.12);color:var(--coral)}
+.toggle-wrap{
+  display:flex;justify-content:flex-end;
+  margin-bottom:16px;
+}
+.toggle{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;
+}
+.toggle-switch{
+  width:44px;height:24px;border-radius:12px;
+  background:rgba(255,255,255,0.1);
+  position:relative;cursor:pointer;
+  transition:background 200ms;
+}
+.toggle-switch.on{background:var(--accent)}
+.toggle-knob{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--text);
+  position:absolute;top:3px;left:3px;
+  transition:left 200ms;
+}
+.toggle-switch.on .toggle-knob{left:23px}
+.chart-wrap{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+  margin-bottom:24px;
+}
+.table-wrap{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+}
+table{width:100%;border-collapse:collapse}
+th{
+  padding:12px 16px;text-align:left;
+  font-size:11px;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted);
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:12px 16px;font-size:13px;
+  border-bottom:0.5px solid rgba(255,255,255,0.03);
+}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+.td-trained{color:var(--teal);font-weight:600}
+/* ── ARCHITECTURE VIEW ── */
+.arch-svg{width:100%;height:100%}
+.arch-node{
+  animation:nodeIn 300ms ease-out both;
+}
+@keyframes nodeIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+/* ── RIGHT PANEL ── */
+.right-panel{
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  padding:24px 16px;
+  overflow-y:auto;
+}
+.right-panel::-webkit-scrollbar{width:4px}
+.right-panel::-webkit-scrollbar-track{background:transparent}
+.right-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.panel-title{
+  font-size:12px;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--muted);
+  margin-bottom:16px;font-weight:600;
+}
+.breakdown-row{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:12px;
+}
+.breakdown-label{font-size:12px;color:var(--muted)}
+.breakdown-value{
+  font-size:13px;font-weight:600;
+  min-width:50px;text-align:right;
+}
+.breakdown-bar-wrap{
+  height:4px;background:rgba(255,255,255,0.06);
+  border-radius:2px;margin-top:4px;
+  overflow:hidden;
+}
+.breakdown-bar{
+  height:100%;border-radius:2px;
+  transition:width 300ms ease-out;
+  width:0%;
+}
+.bar-pos{background:var(--teal)}
+.bar-neg{background:var(--coral)}
+.bar-neutral{background:var(--muted)}
+.total-row{
+  margin-top:20px;padding-top:16px;
+  border-top:2px solid var(--border);
+  display:flex;justify-content:space-between;
+  align-items:center;
+}
+.total-label{font-size:13px;font-weight:600}
+.total-value{font-size:20px;font-weight:700}
+.sparkline-wrap{
+  margin-top:24px;padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.sparkline-title{
+  font-size:11px;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted);
+  margin-bottom:12px;
+}
+.sparkline{
+  width:100%;height:80px;
+}
+.strategy-tags{
+  margin-top:24px;padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.tag{
+  display:inline-block;
+  padding:4px 10px;border-radius:12px;
+  font-size:11px;font-weight:600;
+  margin:0 6px 6px 0;
+}
+.tag-teal{background:rgba(29,158,117,0.12);color:var(--teal)}
+.tag-purple{background:rgba(127,119,221,0.12);color:var(--accent)}
+.tag-coral{background:rgba(216,90,48,0.12);color:var(--coral)}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo">
+      <span>SocraticRL</span>
+      <div class="live-dot"></div>
+    </div>
+    <div class="nav">
+      <div class="nav-pill active" data-view="debate">Debate</div>
+      <div class="nav-pill" data-view="metrics">Metrics</div>
+      <div class="nav-pill" data-view="architecture">Architecture</div>
+    </div>
+    <div class="section-header">Scenario</div>
+    <div class="scenario-list">
+      <div class="scenario-card active" data-id="S-001">S-001 Breach of contract</div>
+      <div class="scenario-card" data-id="S-002">S-002 Fraud / misrepresentation</div>
+      <div class="scenario-card" data-id="S-003">S-003 Force majeure</div>
+      <div class="scenario-card" data-id="S-004">S-004 Minor's agreement</div>
+      <div class="scenario-card" data-id="S-005">S-005 Oral contract</div>
+    </div>
+    <div class="version">v0.1.0 · OpenEnv</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="top-bar">
+      <div class="scenario-title" id="scenarioTitle">S-001 Breach of contract</div>
+      <div class="metrics-pills">
+        <div class="metric-pill">
+          <span>Turn:</span>
+          <span class="metric-value" id="turnValue">0/15</span>
+        </div>
+        <div class="metric-pill">
+          <span>Understanding:</span>
+          <span class="metric-value" id="undValue">0%</span>
+        </div>
+        <div class="metric-pill">
+          <span>Reward:</span>
+          <span class="metric-value" id="rewardValue">0.00</span>
+        </div>
+      </div>
+    </div>
+    <div class="content-area">
+      <!-- DEBATE VIEW -->
+      <div class="view active" id="debateView">
+        <div class="debate-grid">
+          <div class="chat-column">
+            <div class="chat-header">
+              <div class="avatar avatar-agent">🧠</div>
+              <div class="chat-header-text">Socratic Agent</div>
+            </div>
+            <div class="chat-messages" id="agentMessages"></div>
+            <div class="controls">
+              <button class="btn" id="btnStart">Start Episode</button>
+              <button class="btn" id="btnNext" disabled>Next Turn</button>
+              <button class="btn" id="btnReset">Reset</button>
+            </div>
+          </div>
+          <div class="chat-column">
+            <div class="chat-header">
+              <div class="avatar avatar-student">🎓</div>
+              <div class="chat-header-text">Student Simulator</div>
+            </div>
+            <div class="chat-messages" id="studentMessages"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRICS VIEW -->
+      <div class="view" id="metricsView">
+        <div class="toggle-wrap">
+          <div class="toggle">
+            <span>Untrained vs Trained</span>
+            <div class="toggle-switch" id="toggleSwitch">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Avg Episode Reward</div>
+            <div class="metric-stat" id="statReward">-1.8</div>
+            <div class="metric-delta delta-pos">▲ 3.2x improvement</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Direct Answer Rate</div>
+            <div class="metric-stat" id="statDirect">67%</div>
+            <div class="metric-delta delta-neg">▼ 94% reduction</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Student Understanding</div>
+            <div class="metric-stat" id="statUnd">3%</div>
+            <div class="metric-delta delta-pos">▲ 20x improvement</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg Turns to Success</div>
+            <div class="metric-stat" id="statTurns">N/A</div>
+            <div class="metric-delta delta-pos">8.2 turns</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="rewardChart" height="200"></canvas>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Untrained</th><th>Trained</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Avg episode reward</td><td>-1.8</td><td class="td-trained">+1.4</td></tr>
+              <tr><td>Direct-answer rate</td><td>67%</td><td class="td-trained">4%</td></tr>
+              <tr><td>Generic question rate</td><td>58%</td><td class="td-trained">11%</td></tr>
+              <tr><td>Student reached understanding</td><td>3%</td><td class="td-trained">61%</td></tr>
+              <tr><td>Avg turns to understanding</td><td>N/A</td><td class="td-trained">8.2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ARCHITECTURE VIEW -->
+      <div class="view" id="architectureView">
+        <svg class="arch-svg" viewBox="0 0 800 600" id="archSvg"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-title">Reward Breakdown</div>
+    <div id="breakdownRows"></div>
+    <div class="total-row">
+      <div class="total-label">Total</div>
+      <div class="total-value" id="totalReward">+0.00</div>
+    </div>
+    <div class="sparkline-wrap">
+      <div class="sparkline-title">Episode History</div>
+      <canvas class="sparkline" id="sparkline"></canvas>
+    </div>
+    <div class="strategy-tags">
+      <div class="sparkline-title">Agent Strategy</div>
+      <div id="strategyTags"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const App={state:{activeView:'debate',activeScenario:'S-001',turn:0,maxTurns:15,understandingScore:0.05,episodeReward:0,history:[],running:false,trained:false},scenarios:{'S-001':{title:'S-001 Breach of contract',topic:'breach of contract',misconception:'I think if someone breaks a contract they automatically owe the full contract value as damages.'},'S-002':{title:'S-002 Fraud / misrepresentation',topic:'fraud and misrepresentation',misconception:'I think any false statement in a contract automatically makes it fraudulent.'},'S-003':{title:'S-003 Force majeure',topic:'force majeure',misconception:'I think if anything unexpected happens the contract is automatically void.'},'S-004':{title:'S-004 Minor\'s agreement',topic:'minor\'s capacity to contract',misconception:'I think minors can never enter into any contracts at all.'},'S-005':{title:'S-005 Oral contract',topic:'oral contracts',misconception:'I think oral contracts are never legally binding.'}},socraticTemplates:{'S-001':['If the breach caused only $1000 in actual losses but the contract was worth $100,000, what should the damages be?','What evidence would a court need to see to calculate the actual harm caused by the breach?','How would you distinguish between the contract value and the actual damages suffered?','If the non-breaching party could have avoided some losses by taking reasonable steps, should that affect the damages?','What if the breach actually saved the non-breaching party money in some way — should damages still be the full contract value?','Can you think of a situation where a breach might occur but no real damages result?','What role does foreseeability play in determining which damages can be recovered?','If the contract had a liquidated damages clause, how would that change the analysis?'],'S-002':['If a seller genuinely believed a false statement was true when they made it, does that change whether it\'s fraud?','What evidence would you need to prove someone intended to deceive versus just made an honest mistake?','How would you distinguish between a statement of opinion and a statement of fact in a contract?','If the buyer could have easily discovered the truth with basic research, should that affect the fraud claim?','What if the false statement was about something that turned out not to matter to the contract performance?','Can you think of a situation where a false statement might make a contract voidable but not constitute criminal fraud?','What role does reliance play — if the buyer didn\'t actually rely on the false statement, is it still fraud?','If both parties made false statements to each other, how should a court handle that?'],'S-003':['If the pandemic was foreseeable even 2 months before the event, does that change whether force majeure should apply?','What evidence would a court need to see to accept that the event truly was beyond the party\'s control?','How would you distinguish between an event being difficult and an event being truly impossible to perform around?','If the party could have taken steps to mitigate the impact of the event, should that affect the force majeure defense?','What if the contract specifically listed pandemics as a force majeure event versus being silent on it?','Can you think of a situation where an unexpected event occurs but the contract should still be enforced?','What role does the foreseeability of the event play in the force majeure analysis?','If only part of the contract became impossible to perform, should the entire contract be voided?'],'S-004':['If a 17-year-old signs a contract for necessities like food or shelter, should that be treated differently than a contract for a luxury car?','What evidence would show that a minor actually understood the contract they were signing?','How would you distinguish between a contract that\'s void versus voidable when a minor is involved?','If the minor lied about their age and the other party reasonably believed they were an adult, should that change the outcome?','What if the minor has already received and used the benefits under the contract — can they still void it?','Can you think of a situation where enforcing a contract against a minor might actually protect the minor\'s interests?','What role does emancipation play — if a minor is legally emancipated, does that change their capacity to contract?','If the minor turns 18 and continues performing under the contract, what effect does that have?'],'S-005':['If both parties clearly agreed to the terms and performed for months, why would the lack of a writing matter?','What evidence would a court accept to prove the terms of an oral contract if the parties later disagree?','How would you distinguish between an oral contract and just preliminary negotiations?','If the contract could be performed within one year, does that change whether it needs to be in writing?','What if one party has already fully performed their side of the oral contract — should the other party still be able to claim it\'s unenforceable?','Can you think of a situation where an oral contract might be more reliable than a poorly-drafted written one?','What role does partial performance play in proving an oral contract existed?','If the parties exchanged emails or texts discussing the agreement, does that satisfy the writing requirement?']},studentResponses:{'S-001':['I mean... if someone breaks a contract, shouldn\'t they pay the full value? That seems fair.','I guess I always assumed the contract value was the damages. Is that not how it works?','Wait, so you only get compensated for actual losses, not the full contract amount?','Oh — so if the breach didn\'t actually harm you much, you can\'t claim huge damages just because the contract was valuable?','I think I see it now — the goal is to put the non-breaching party in the position they would have been in, not to punish the breacher.','That makes sense. Damages are about compensation for actual harm, not about the contract\'s face value.'],'S-002':['I thought any false statement automatically made it fraud. Isn\'t lying in a contract always illegal?','So there\'s a difference between fraud and just being wrong? Intent matters?','Oh, so if someone genuinely believed what they said was true, it\'s not fraud even if it turns out to be false?','I see — fraud requires proof of intent to deceive, not just a false statement.','So the buyer\'s reliance matters too — if they didn\'t actually rely on the statement, there\'s no fraud?','I think I understand now. Fraud is about intentional deception that the other party relied on, not just any false statement.'],'S-003':['I thought force majeure meant any unexpected event voids the contract. Isn\'t that the point?','So it has to be truly impossible, not just harder or more expensive?','Oh — so foreseeability matters. If you could have predicted it, you can\'t claim force majeure?','I see. The contract language matters a lot — if it specifically lists the event, that\'s different than if it\'s silent.','So force majeure is a narrow defense, not a general escape clause for any difficulty?','I think I get it now. It\'s about events that are truly beyond control and make performance impossible, not just inconvenient.'],'S-004':['I thought minors just can\'t enter contracts at all. Isn\'t that the rule?','So there\'s a difference between void and voidable? The minor can choose to enforce it or not?','Oh, so contracts for necessities are treated differently because we don\'t want to prevent minors from getting food and shelter?','I see — if the minor lied about their age, that might change things because the other party was misled.','So the minor has the power to void the contract, but the adult doesn\'t?','I think I understand now. The law protects minors by giving them the option to void contracts, but not absolutely preventing them from contracting.'],'S-005':['I thought oral contracts were never enforceable. Don\'t you always need it in writing?','So the Statute of Frauds only applies to certain types of contracts, not all of them?','Oh — so if it can be performed within a year, it doesn\'t need to be in writing?','I see. Partial performance can take an oral contract out of the Statute of Frauds.','So oral contracts are enforceable, they\'re just harder to prove if there\'s a dispute?','I think I get it now. Writing is required for specific categories of contracts, but most oral agreements are actually binding.']},computeReward(output,topic,turn,history){const r={total:0,breakdown:{check1:0,check2:0,check3:0,check4:0,check5:0,check6:0}};const text=output.trim();const lower=text.toLowerCase();if(text.endsWith('?')){r.breakdown.check1=0.20;r.total+=0.20}else{r.breakdown.check1=-0.30;r.total-=0.30}const directPatterns=['the answer is','the reason is','because','let me explain','this is because','actually,','in fact,','the truth is','simply put','to summarize','to be clear','the definition','by definition'];for(let p of directPatterns){if(lower.includes(p)){r.breakdown.check2=-0.50;r.total-=0.50;break}}const goodPatterns=['what do you','what would you','what might','how do you','how would you','how might','how could','why do you','why would you','why might','why could','can you imagine','can you think','can you describe','can you explain','can you consider','if','do you think','could you'];const topicWords=topic.toLowerCase().split(' ').filter(w=>w.length>3&&!['what','how','why','does','the','and','for','with','that','this'].includes(w));const hasSocratic=goodPatterns.some(p=>lower.includes(p));const hasTopic=topicWords.some(w=>lower.includes(w));if(hasSocratic&&hasTopic){r.breakdown.check3=0.30;r.total+=0.30}else if(hasSocratic&&!hasTopic){r.breakdown.check3=-0.40;r.total-=0.40}const wc=text.split(/\s+/).length;if(wc<5){r.breakdown.check4=-0.20;r.total-=0.20}if(wc>60){r.breakdown.check4-=0.10;r.total-=0.10}for(let prev of history.slice(-3)){const sa=new Set(text.toLowerCase().split(/\s+/));const sb=new Set(prev.toLowerCase().split(/\s+/));const inter=new Set([...sa].filter(x=>sb.has(x)));const union=new Set([...sa,...sb]);const jaccard=inter.size/union.size;if(jaccard>0.55){r.breakdown.check5=-0.35;r.total-=0.35;break}}if(turn<=5&&this.state.understandingScore>0.40){r.breakdown.check6=0.20;r.total+=0.20}r.total=Math.round(r.total*100)/100;return r},nextTurn(){if(!this.state.running)return;const scenario=this.scenarios[this.state.activeScenario];const templates=this.socraticTemplates[this.state.activeScenario];const responses=this.studentResponses[this.state.activeScenario];const agentQ=templates[this.state.turn%templates.length];const reward=this.computeReward(agentQ,scenario.topic,this.state.turn,this.state.history);this.state.history.push(agentQ);this.state.episodeReward+=reward.total;if(reward.total>0){this.state.understandingScore=Math.min(1,this.state.understandingScore+0.08)}else{this.state.understandingScore=Math.min(1,this.state.understandingScore+0.02)}this.state.turn++;const studentResp=responses[Math.min(this.state.turn-1,responses.length-1)];const done=this.state.understandingScore>=0.85||this.state.turn>=this.state.maxTurns;if(done){this.state.running=false;document.getElementById('btnNext').disabled=true}this.showTypingIndicator();setTimeout(()=>{this.hideTypingIndicator();this.appendAgentBubble(agentQ,reward);setTimeout(()=>{this.appendStudentBubble(studentResp);this.updateUI();this.animateRewardBars(reward.breakdown);this.updateSparkline();this.updateStrategyTags(agentQ,reward)},400)},500)},showTypingIndicator(){const el=document.createElement('div');el.id='typingIndicator';el.className='typing-indicator';el.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';document.getElementById('agentMessages').appendChild(el);el.scrollIntoView({behavior:'smooth'})},hideTypingIndicator(){const el=document.getElementById('typingIndicator');if(el)el.remove()},appendAgentBubble(text,reward){const bubble=document.createElement('div');bubble.className='bubble bubble-agent';const parts=[];for(let k in reward.breakdown){if(reward.breakdown[k]!==0){const v=reward.breakdown[k];parts.push(`<span class="${v>0?'pos':'neg'}">${v>0?'+':''}${v.toFixed(2)}</span>`)}}const summary=`<div class="reward-summary">↑ ${reward.total>=0?'+':''}${reward.total.toFixed(2)} · ${parts.join(' · ')}</div>`;bubble.innerHTML=text+summary;document.getElementById('agentMessages').appendChild(bubble);bubble.scrollIntoView({behavior:'smooth'})},appendStudentBubble(text){const bubble=document.createElement('div');bubble.className='bubble bubble-student';bubble.textContent=text;document.getElementById('studentMessages').appendChild(bubble);bubble.scrollIntoView({behavior:'smooth'})},updateUI(){document.getElementById('turnValue').textContent=`${this.state.turn}/${this.state.maxTurns}`;document.getElementById('undValue').textContent=`${Math.round(this.state.understandingScore*100)}%`;document.getElementById('rewardValue').textContent=this.state.episodeReward.toFixed(2);document.getElementById('progressBar').style.width=`${this.state.understandingScore*100}%`;const totalEl=document.getElementById('totalReward');totalEl.textContent=(this.state.episodeReward>=0?'+':'')+this.state.episodeReward.toFixed(2);totalEl.style.color=this.state.episodeReward>=0?'var(--teal)':'var(--coral)'},animateRewardBars(breakdown){const checks=[{label:'Is it a question?',key:'check1'},{label:'Direct answer penalty',key:'check2'},{label:'Socratic pattern',key:'check3'},{label:'Length guard',key:'check4'},{label:'Repetition penalty',key:'check5'}];const html=checks.map((c,i)=>{const val=breakdown[c.key]||0;const cls=val>0?'pos':val<0?'neg':'neutral';const pct=Math.min(Math.abs(val)*100,100);return`<div class="breakdown-row" style="animation-delay:${i*60}ms"><div><div class="breakdown-label">${c.label}</div><div class="breakdown-bar-wrap"><div class="breakdown-bar bar-${cls}" data-width="${pct}"></div></div></div><div class="breakdown-value ${cls}">${val>=0?'+':''}${val.toFixed(2)}</div></div>`}).join('');document.getElementById('breakdownRows').innerHTML=html;setTimeout(()=>{document.querySelectorAll('.breakdown-bar').forEach(bar=>{bar.style.width=bar.dataset.width+'%'})},50)},updateSparkline(){const canvas=document.getElementById('sparkline');const ctx=canvas.getContext('2d');const w=canvas.width=canvas.offsetWidth*2;const h=canvas.height=canvas.offsetHeight*2;ctx.clearRect(0,0,w,h);if(this.state.turn===0)return;const rewards=[];for(let i=0;i<this.state.turn;i++){const r=this.computeReward(this.state.history[i],this.scenarios[this.state.activeScenario].topic,i,this.state.history.slice(0,i));rewards.push(r.total)}const max=1.5;const min=-1.5;const range=max-min;const xStep=w/(this.state.turn-1||1);const yZero=h*(max/range);ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,yZero);ctx.lineTo(w,yZero);ctx.stroke();ctx.strokeStyle='var(--teal)';ctx.lineWidth=3;ctx.beginPath();rewards.forEach((r,i)=>{const x=i*xStep;const y=h-((r-min)/range)*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke()},updateStrategyTags(question,reward){const tags=[];if(question.endsWith('?'))tags.push({text:'QUESTION ✓',cls:'teal'});if(/\bif\b.*\bthen\b|\bif\b.*\bwhat\b|\bif\b.*\bhow\b/i.test(question))tags.push({text:'IF-THEN ✓',cls:'purple'});if(reward.breakdown.check3>0)tags.push({text:'ON-TOPIC ✓',cls:'teal'});if(reward.breakdown.check5<0)tags.push({text:'REPETITIVE ✗',cls:'coral'});const html=tags.map(t=>`<span class="tag tag-${t.cls}">${t.text}</span>`).join('');document.getElementById('strategyTags').innerHTML=html},startEpisode(){this.state.running=true;this.state.turn=0;this.state.understandingScore=0.05;this.state.episodeReward=0;this.state.history=[];document.getElementById('agentMessages').innerHTML='';document.getElementById('studentMessages').innerHTML='';document.getElementById('btnStart').disabled=true;document.getElementById('btnNext').disabled=false;this.updateUI();this.nextTurn()},reset(){this.state.running=false;this.state.turn=0;this.state.understandingScore=0.05;this.state.episodeReward=0;this.state.history=[];document.getElementById('agentMessages').innerHTML='';document.getElementById('studentMessages').innerHTML='';document.getElementById('btnStart').disabled=false;document.getElementById('btnNext').disabled=true;document.getElementById('breakdownRows').innerHTML='';document.getElementById('strategyTags').innerHTML='';this.updateUI()},switchView(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(view+'View').classList.add('active');document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));document.querySelector(`[data-view="${view}"]`).classList.add('active');this.state.activeView=view;if(view==='architecture')this.renderArchitecture()},switchScenario(id){const content=document.querySelector('.content-area');content.style.opacity='0';setTimeout(()=>{this.state.activeScenario=id;document.getElementById('scenarioTitle').textContent=this.scenarios[id].title;document.querySelectorAll('.scenario-card').forEach(c=>c.classList.remove('active'));document.querySelector(`[data-id="${id}"]`).classList.add('active');this.reset();content.style.opacity='1'},150)},renderArchitecture(){const svg=document.getElementById('archSvg');svg.innerHTML=`<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#7F77DD"/></marker></defs><g class="arch-node" style="animation-delay:0ms"><rect x="50" y="50" width="180" height="60" rx="8" fill="#0D2420" stroke="#1D9E75" stroke-width="2"/><text x="140" y="75" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">Student Simulator</text><text x="140" y="95" text-anchor="middle" fill="#8884A8" font-size="10">Deterministic responses</text></g><g class="arch-node" style="animation-delay:80ms"><rect x="50" y="150" width="180" height="60" rx="8" fill="#1A1830" stroke="#7F77DD" stroke-width="2"/><text x="140" y="175" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">SocraticEnv</text><text x="140" y="195" text-anchor="middle" fill="#8884A8" font-size="10">OpenEnv protocol</text></g><g class="arch-node" style="animation-delay:160ms"><rect x="300" y="150" width="180" height="60" rx="8" fill="#0D2420" stroke="#1D9E75" stroke-width="2"/><text x="390" y="175" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">Reward Function</text><text x="390" y="195" text-anchor="middle" fill="#8884A8" font-size="10">Pure Python, 6 checks</text></g><g class="arch-node" style="animation-delay:240ms"><rect x="550" y="150" width="180" height="60" rx="8" fill="#1A1008" stroke="#D85A30" stroke-width="2"/><text x="640" y="175" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">GRPO Trainer</text><text x="640" y="195" text-anchor="middle" fill="#8884A8" font-size="10">trl library</text></g><g class="arch-node" style="animation-delay:320ms"><rect x="550" y="250" width="180" height="60" rx="8" fill="#1A1008" stroke="#D85A30" stroke-width="2"/><text x="640" y="275" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">Qwen2.5-1.5B</text><text x="640" y="295" text-anchor="middle" fill="#8884A8" font-size="10">4-bit, Colab T4</text></g><g class="arch-node" style="animation-delay:400ms"><rect x="300" y="50" width="180" height="60" rx="8" fill="#141414" stroke="#444441" stroke-width="2"/><text x="390" y="75" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">FastAPI Server</text><text x="390" y="95" text-anchor="middle" fill="#8884A8" font-size="10">OpenEnv endpoints</text></g><g class="arch-node" style="animation-delay:480ms"><rect x="550" y="50" width="180" height="60" rx="8" fill="#141414" stroke="#444441" stroke-width="2"/><text x="640" y="75" text-anchor="middle" fill="#F0EFFF" font-size="13" font-weight="600">HF Space</text><text x="640" y="95" text-anchor="middle" fill="#8884A8" font-size="10">Live dashboard</text></g><path d="M140,110 L140,150" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M230,180 L300,180" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M480,180 L550,180" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M640,210 L640,250" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M230,180 Q265,120 300,80" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M480,80 L550,80" stroke="#7F77DD" stroke-width="2" fill="none" marker-end="url(#arrow)"/>`},initMetricsChart(){const ctx=document.getElementById('rewardChart').getContext('2d');const episodes=Array.from({length:20},(_,i)=>i+1);const untrained=[-2.1,-1.9,-2.3,-1.7,-1.5,-2.0,-1.8,-1.6,-2.2,-1.9,-1.7,-2.1,-1.8,-1.9,-2.0,-1.6,-1.8,-1.7,-2.0,-1.9];const trained=[0.8,1.0,1.2,1.1,1.3,1.5,1.4,1.6,1.5,1.7,1.6,1.8,1.7,1.9,1.8,2.0,1.9,2.1,2.0,2.2];new Chart(ctx,{type:'line',data:{labels:episodes,datasets:[{label:'Untrained',data:untrained,borderColor:'var(--coral)',borderDash:[5,5],borderWidth:2,pointRadius:3,fill:false},{label:'Trained',data:trained,borderColor:'var(--teal)',borderWidth:2,pointRadius:3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:800,easing:'easeInOutQuad'},plugins:{legend:{labels:{color:'var(--muted)',font:{size:11}}}},scales:{x:{ticks:{color:'var(--muted)'},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'var(--muted)'},grid:{color:'rgba(255,255,255,0.03)'},suggestedMin:-3,suggestedMax:3}}}})},toggleMetrics(){this.state.trained=!this.state.trained;document.getElementById('toggleSwitch').classList.toggle('on');const vals=this.state.trained?{reward:1.4,direct:'4%',und:'61%',turns:'8.2'}:{reward:-1.8,direct:'67%',und:'3%',turns:'N/A'};this.rollNumber(document.getElementById('statReward'),parseFloat(document.getElementById('statReward').textContent),vals.reward,600);this.rollNumber(document.getElementById('statDirect'),parseInt(document.getElementById('statDirect').textContent),parseInt(vals.direct),600,true);this.rollNumber(document.getElementById('statUnd'),parseInt(document.getElementById('statUnd').textContent),parseInt(vals.und),600,true);document.getElementById('statTurns').textContent=vals.turns},rollNumber(el,from,to,duration,isPercent=false){const start=Date.now();const animate=()=>{const now=Date.now();const progress=Math.min((now-start)/duration,1);const eased=1-Math.pow(1-progress,3);const current=from+(to-from)*eased;el.textContent=(isPercent?Math.round(current)+'%':current.toFixed(1));if(progress<1)requestAnimationFrame(animate)};animate()},init(){document.querySelectorAll('.nav-pill').forEach(pill=>{pill.addEventListener('click',()=>this.switchView(pill.dataset.view))});document.querySelectorAll('.scenario-card').forEach(card=>{card.addEventListener('click',()=>this.switchScenario(card.dataset.id))});document.getElementById('btnStart').addEventListener('click',()=>this.startEpisode());document.getElementById('btnNext').addEventListener('click',()=>this.nextTurn());document.getElementById('btnReset').addEventListener('click',()=>this.reset());document.getElementById('toggleSwitch').addEventListener('click',()=>this.toggleMetrics());this.initMetricsChart();this.updateUI()}};App.init();
+</script>
+</body>
+</html>

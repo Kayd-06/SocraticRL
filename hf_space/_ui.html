@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SocraticRL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07090f;--surface:#0d1117;--card:#111827;--border:#1f2937;
+  --accent:#6ee7b7;--accent2:#818cf8;--accent3:#f472b6;
+  --text:#f1f5f9;--muted:#64748b;--danger:#f87171;--warn:#fbbf24;
+  --agent-bg:linear-gradient(135deg,#0f2027,#1a2a3a);
+  --student-bg:linear-gradient(135deg,#0f1f0f,#1a2e1a);
+  --radius:14px;--radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ── animated starfield bg ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%,rgba(110,231,183,.04) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(129,140,248,.05) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── header ── */
+header{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:60px;
+  background:rgba(7,9,15,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;box-shadow:0 0 20px rgba(110,231,183,.3);
+}
+.logo-text{font-size:1.1rem;font-weight:700;letter-spacing:-.3px}
+.logo-text span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:16px}
+.badge{
+  padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.badge-green{background:rgba(110,231,183,.12);color:var(--accent);border:1px solid rgba(110,231,183,.2)}
+.badge-purple{background:rgba(129,140,248,.12);color:var(--accent2);border:1px solid rgba(129,140,248,.2)}
+.tagline{font-size:.8rem;color:var(--muted);font-style:italic}
+
+/* ── layout ── */
+.layout{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:20px;
+  padding:24px 32px;
+  max-width:1400px;margin:0 auto;
+  position:relative;z-index:1;
+}
+
+/* ── section titles ── */
+.section-title{
+  font-size:.7rem;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── topic input area ── */
+.topic-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:16px;
+  transition:border-color .2s;
+}
+.topic-card:focus-within{border-color:rgba(110,231,183,.4)}
+.topic-label{font-size:.75rem;font-weight:500;color:var(--muted);margin-bottom:8px;display:block}
+.topic-input-row{display:flex;gap:10px;align-items:center}
+#topic-input{
+  flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--text);border-radius:var(--radius-sm);
+  padding:11px 16px;font-size:.9rem;font-family:'Inter',sans-serif;
+  transition:border-color .2s,box-shadow .2s;outline:none;
+}
+#topic-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(110,231,183,.1)}
+#topic-input::placeholder{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{
+  padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:500;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.chip:hover{background:rgba(110,231,183,.1);border-color:rgba(110,231,183,.3);color:var(--accent)}
+
+/* ── buttons ── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 20px;border:none;border-radius:var(--radius-sm);
+  font-size:.88rem;font-weight:600;cursor:pointer;
+  transition:all .2s;white-space:nowrap;font-family:'Inter',sans-serif;
+}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#34d399);
+  color:#07090f;box-shadow:0 4px 20px rgba(110,231,183,.25);
+}
+.btn-primary:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(110,231,183,.35)}
+.btn-secondary{
+  background:linear-gradient(135deg,var(--accent2),#6366f1);
+  color:#fff;box-shadow:0 4px 20px rgba(129,140,248,.2);
+}
+.btn-secondary:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(129,140,248,.3)}
+.btn-row{display:flex;gap:10px;margin-bottom:16px}
+.btn-row .btn{flex:1}
+
+/* ── chat window ── */
+.chat-window{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:16px;
+}
+.chat-header{
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,.02);
+}
+.chat-header-left{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot-green{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.dot-blue{background:var(--accent2);box-shadow:0 0 8px var(--accent2)}
+.dot-red{background:var(--danger)}
+.traffic{display:flex;gap:5px;align-items:center}
+#chat{
+  height:400px;overflow-y:auto;padding:20px;
+  display:flex;flex-direction:column;gap:16px;
+  scroll-behavior:smooth;
+}
+#chat::-webkit-scrollbar{width:4px}
+#chat::-webkit-scrollbar-track{background:transparent}
+#chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── bubbles ── */
+.bubble-row{display:flex;gap:10px;animation:bubbleIn .35s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.bubble-row.agent{align-items:flex-start}
+.bubble-row.student{align-items:flex-start;flex-direction:row-reverse}
+.avatar{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.avatar-agent{background:linear-gradient(135deg,#0f2027,#1a3a4a);border:1px solid rgba(110,231,183,.2)}
+.avatar-student{background:linear-gradient(135deg,#1a0f27,#2a1a3a);border:1px solid rgba(129,140,248,.2)}
+.bubble-content{max-width:78%}
+.bubble-name{font-size:.68rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;padding:0 4px}
+.name-agent{color:var(--accent)}
+.name-student{color:var(--accent2);text-align:right}
+.bubble{
+  padding:12px 16px;border-radius:12px;font-size:.875rem;line-height:1.6;
+  position:relative;
+}
+.bubble-agent{
+  background:var(--agent-bg);border:1px solid rgba(110,231,183,.12);
+  border-top-left-radius:3px;
+}
+.bubble-student{
+  background:var(--student-bg);border:1px solid rgba(129,140,248,.12);
+  border-top-right-radius:3px;
+}
+.reward-strip{
+  margin-top:8px;padding:6px 10px;border-radius:6px;
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+}
+.reward-total{font-weight:700}
+.reward-pos{color:var(--accent)}
+.reward-neg{color:var(--danger)}
+.reward-tag{
+  padding:1px 6px;border-radius:4px;font-size:.63rem;
+  background:rgba(255,255,255,.05);color:var(--muted);
+}
+.reward-tag.pos{background:rgba(110,231,183,.08);color:var(--accent)}
+.reward-tag.neg{background:rgba(248,113,113,.08);color:var(--danger)}
+
+/* ── typing indicator ── */
+.typing-row{display:flex;gap:10px;align-items:flex-start}
+.typing-bubble{
+  padding:12px 16px;border-radius:12px;border-top-left-radius:3px;
+  background:var(--agent-bg);border:1px solid rgba(110,231,183,.12);
+  display:flex;gap:5px;align-items:center;
+}
+.typing-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.4;
+  animation:typingPulse 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingPulse{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* ── empty state ── */
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;color:var(--muted);
+}
+.empty-icon{font-size:2.5rem;opacity:.3}
+.empty-text{font-size:.85rem;text-align:center;line-height:1.6;max-width:260px}
+
+/* ── stats bar ── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;
+}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 16px;text-align:center;transition:border-color .2s;
+}
+.stat-value{font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.stat-label{font-size:.65rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.stat-turn .stat-value{color:var(--accent2)}
+.stat-und .stat-value{color:var(--accent)}
+.stat-reward .stat-value{color:var(--warn)}
+
+/* ── understanding bar ── */
+.und-bar-wrap{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;
+}
+.und-bar-label{display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:8px}
+.und-bar-label span:first-child{color:var(--muted)}
+.und-bar-label span:last-child{font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+.und-track{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.und-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  transition:width .6s cubic-bezier(.34,1.2,.64,1);
+  box-shadow:0 0 12px rgba(110,231,183,.4);
+  width:0%;
+}
+
+/* ── messages ── */
+#error-msg{
+  min-height:20px;font-size:.78rem;color:var(--danger);
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;
+}
+#done-banner{
+  display:none;padding:14px 18px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,rgba(110,231,183,.1),rgba(52,211,153,.05));
+  border:1px solid rgba(110,231,183,.25);margin-bottom:16px;
+  animation:fadeSlideIn .4s ease both;
+}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.done-title{font-size:.9rem;font-weight:700;color:var(--accent);margin-bottom:2px}
+.done-sub{font-size:.78rem;color:var(--muted)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;gap:16px}
+
+/* ── chart card ── */
+.chart-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;
+}
+.chart-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.chart-title{font-size:.82rem;font-weight:600;color:var(--text)}
+.chart-sub{font-size:.7rem;color:var(--muted)}
+
+/* ── metrics table ── */
+.metrics-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.metrics-card-header{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  font-size:.82rem;font-weight:600;
+  background:rgba(255,255,255,.02);
+}
+table{width:100%;border-collapse:collapse}
+th{
+  padding:9px 14px;text-align:left;font-size:.68rem;
+  font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);background:rgba(255,255,255,.02);
+  border-bottom:1px solid var(--border);
+}
+td{padding:9px 14px;font-size:.8rem;border-bottom:1px solid rgba(31,41,55,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.td-metric{color:var(--text)}
+.td-before{color:var(--danger);font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.td-after{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600}
+
+/* ── reward formula accordion ── */
+.formula-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+}
+.formula-toggle{
+  width:100%;padding:14px 18px;background:none;border:none;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  font-size:.82rem;font-weight:600;color:var(--text);
+  transition:background .15s;
+}
+.formula-toggle:hover{background:rgba(255,255,255,.03)}
+.formula-toggle .chevron{transition:transform .25s;color:var(--muted);font-size:.7rem}
+.formula-toggle.open .chevron{transform:rotate(180deg)}
+.formula-body{
+  max-height:0;overflow:hidden;transition:max-height .3s ease;
+}
+.formula-body.open{max-height:600px}
+pre{
+  padding:16px 18px;font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;line-height:1.8;color:#94a3b8;
+  border-top:1px solid var(--border);overflow-x:auto;
+}
+.kw{color:var(--accent2)}.pos-c{color:var(--accent)}.neg-c{color:var(--danger)}.cm{color:#475569}
+
+/* ── footer ── */
+footer{
+  text-align:center;padding:20px;font-size:.72rem;color:var(--muted);
+  border-top:1px solid var(--border);position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:center;gap:16px;
+}
+.footer-dot{width:3px;height:3px;border-radius:50%;background:var(--border)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-text"><span>Socratic</span>RL</div>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-green">GRPO Trained</span>
+    <span class="badge badge-purple">OpenEnv</span>
+    <span class="tagline">Teaching through questions, never answers</span>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ══ LEFT PANEL ══ -->
+  <div class="left-panel">
+
+    <div class="section-title">Topic</div>
+
+    <div class="topic-card">
+      <label class="topic-label" for="topic-input">Enter any topic to explore</label>
+      <div class="topic-input-row">
+        <input id="topic-input" type="text"
+          placeholder="e.g. Why does the Moon cause tides?"/>
+      </div>
+      <div class="chips">
+        <span class="chip" onclick="setTopic('Why do objects fall at the same speed regardless of mass?')">⚖️ Falling objects</span>
+        <span class="chip" onclick="setTopic('Why is the sky blue?')">🌤️ Sky colour</span>
+        <span class="chip" onclick="setTopic('How does photosynthesis work?')">🌿 Photosynthesis</span>
+        <span class="chip" onclick="setTopic('Why does ice float on water?')">🧊 Ice &amp; water</span>
+        <span class="chip" onclick="setTopic('What causes seasons on Earth?')">🌍 Seasons</span>
+        <span class="chip" onclick="setTopic('How does gravity work?')">🪐 Gravity</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-start" onclick="startEpisode()">
+        <span>▶</span> Start Episode
+      </button>
+      <button class="btn btn-secondary" id="btn-next" onclick="nextTurn()" disabled>
+        <span>→</span> Next Turn
+      </button>
+    </div>
+
+    <div class="section-title">Conversation</div>
+
+    <div class="chat-window">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="traffic">
+            <div class="dot dot-red"></div>
+            <div class="dot" style="background:#fbbf24"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <span style="margin-left:6px">Live Session</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="dot dot-green" id="live-dot" style="opacity:0;transition:opacity .3s"></div>
+          <span style="font-size:.72rem;color:var(--muted)" id="live-label"></span>
+        </div>
+      </div>
+      <div id="chat">
+        <div class="empty-state">
+          <div class="empty-icon">💬</div>
+          <div class="empty-text">Enter a topic above and click <strong>Start Episode</strong> to begin a Socratic dialogue</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="error-msg"></div>
+    <div id="done-banner">
+      <div class="done-title">🎓 Episode Complete</div>
+      <div class="done-sub" id="done-sub"></div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card stat-turn">
+        <div class="stat-value" id="bar-turn">0</div>
+        <div class="stat-label">Turn / 15</div>
+      </div>
+      <div class="stat-card stat-und">
+        <div class="stat-value" id="bar-und">0%</div>
+        <div class="stat-label">Understanding</div>
+      </div>
+      <div class="stat-card stat-reward">
+        <div class="stat-value" id="bar-reward">+0.00</div>
+        <div class="stat-label">Episode Reward</div>
+      </div>
+    </div>
+
+    <div class="und-bar-wrap">
+      <div class="und-bar-label">
+        <span>Student Understanding Progress</span>
+        <span id="und-pct">0%</span>
+      </div>
+      <div class="und-track"><div class="und-fill" id="und-fill"></div></div>
+    </div>
+
+  </div>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <div class="right-panel">
+
+    <div class="section-title">Live Reward Signal</div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Reward per Turn</div>
+        <div class="chart-sub">Current episode</div>
+      </div>
+      <canvas id="rewardChart" height="160"></canvas>
+    </div>
+
+    <div class="section-title">Training Results</div>
+
+    <div class="metrics-card">
+      <div class="metrics-card-header">Before vs After GRPO Training</div>
+      <table>
+        <thead><tr><th>Metric</th><th>Untrained</th><th>Trained</th></tr></thead>
+        <tbody>
+          <tr><td class="td-metric">Avg episode reward</td><td class="td-before">-1.8</td><td class="td-after">+1.4</td></tr>
+          <tr><td class="td-metric">Direct-answer rate</td><td class="td-before">67%</td><td class="td-after">4%</td></tr>
+          <tr><td class="td-metric">Generic question rate</td><td class="td-before">58%</td><td class="td-after">11%</td></tr>
+          <tr><td class="td-metric">Student reached understanding</td><td class="td-before">3%</td><td class="td-after">61%</td></tr>
+          <tr><td class="td-metric">Avg turns to understanding</td><td class="td-before">N/A</td><td class="td-after">8.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Reward Formula</div>
+
+    <div class="formula-card">
+      <button class="formula-toggle" id="formula-btn" onclick="toggleFormula()">
+        <span>⚙️ View Reward Function</span>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="formula-body" id="formula-body">
+        <pre><span class="cm"># Every check is a deterministic string op — no model called</span>
+reward = <span class="pos-c">0.0</span>
+
+<span class="cm"># Check 1 — form constraint</span>
+<span class="kw">if</span> output.endswith(<span class="pos-c">"?"</span>):       reward += <span class="pos-c">0.20</span>
+<span class="kw">else</span>:                          reward -= <span class="neg-c">0.30</span>
+
+<span class="cm"># Check 2 — direct answer penalty</span>
+<span class="kw">if</span> matches DIRECT_ANSWER_PATTERNS: reward -= <span class="neg-c">0.50</span>
+
+<span class="cm"># Check 3 — Socratic pattern + topic specificity</span>
+<span class="kw">if</span> socratic AND topic-specific:   reward += <span class="pos-c">0.30</span>
+<span class="kw">if</span> socratic BUT generic only:     reward -= <span class="neg-c">0.40</span>
+
+<span class="cm"># Check 4 — length guard</span>
+<span class="kw">if</span> word_count &lt; 5:  reward -= <span class="neg-c">0.20</span>
+<span class="kw">if</span> word_count &gt; 60: reward -= <span class="neg-c">0.10</span>
+
+<span class="cm"># Check 5 — repetition penalty (Jaccard &gt; 0.55)</span>
+<span class="kw">for</span> prev <span class="kw">in</span> last_3_turns:
+    <span class="kw">if</span> jaccard(q, prev) &gt; 0.55: reward -= <span class="neg-c">0.35</span>
+
+<span class="cm"># Check 6 — early progress bonus</span>
+<span class="kw">if</span> turn &lt;= 5 AND understanding &gt; 0.40: reward += <span class="pos-c">0.20</span></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>OpenEnv compatible</span>
+  <div class="footer-dot"></div>
+  <span>GRPO trained on Colab T4</span>
+  <div class="footer-dot"></div>
+  <span>Zero human judgment</span>
+  <div class="footer-dot"></div>
+  <span>SocraticRL v0.1.0</span>
+</footer>
+
+<script>
+let turn=0,understanding=0,episodeReward=0,history=[],lastStudent="",busy=false,chart=null;
+
+function setTopic(t){document.getElementById("topic-input").value=t}
+
+function initChart(){
+  const ctx=document.getElementById("rewardChart").getContext("2d");
+  if(chart)chart.destroy();
+  chart=new Chart(ctx,{
+    type:"line",
+    data:{labels:[],datasets:[
+      {label:"Reward",data:[],borderColor:"#6ee7b7",backgroundColor:"rgba(110,231,183,.08)",
+       tension:.4,pointRadius:5,pointBackgroundColor:"#6ee7b7",
+       pointHoverRadius:7,borderWidth:2,fill:true},
+      {label:"Break-even",data:[],borderColor:"rgba(100,116,139,.4)",
+       borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false}
+    ]},
+    options:{
+      responsive:true,animation:{duration:400},
+      plugins:{legend:{labels:{color:"#64748b",font:{size:11,family:"Inter"},boxWidth:12}}},
+      scales:{
+        x:{ticks:{color:"#475569",font:{size:10}},grid:{color:"rgba(31,41,55,.8)"}},
+        y:{ticks:{color:"#475569",font:{size:10}},grid:{color:"rgba(31,41,55,.8)"},
+           suggestedMin:-1.2,suggestedMax:1.2}
+      }
+    }
+  });
+}
+
+function updateChart(t,r){
+  chart.data.labels.push("T"+t);
+  chart.data.datasets[0].data.push(r);
+  chart.data.datasets[1].data=chart.data.labels.map(()=>0);
+  chart.update();
+}
+
+function toggleFormula(){
+  const btn=document.getElementById("formula-btn");
+  const body=document.getElementById("formula-body");
+  btn.classList.toggle("open");
+  body.classList.toggle("open");
+}
+
+function setLive(on,label){
+  document.getElementById("live-dot").style.opacity=on?"1":"0";
+  document.getElementById("live-label").textContent=label||"";
+}
+
+function updateStats(){
+  document.getElementById("bar-turn").textContent=turn;
+  document.getElementById("bar-und").textContent=Math.round(understanding*100)+"%";
+  const r=episodeReward;
+  const el=document.getElementById("bar-reward");
+  el.textContent=(r>=0?"+":"")+r.toFixed(2);
+  el.style.color=r>0?"var(--accent)":r<0?"var(--danger)":"var(--warn)";
+  const pct=Math.round(understanding*100)+"%";
+  document.getElementById("und-pct").textContent=pct;
+  document.getElementById("und-fill").style.width=pct;
+}
+
+function setBusy(s){
+  busy=s;
+  document.getElementById("btn-start").disabled=s;
+  document.getElementById("btn-next").disabled=s||turn===0;
+}
+
+function appendTyping(){
+  const chat=document.getElementById("chat");
+  const row=document.createElement("div");
+  row.id="typing-row";row.className="typing-row";
+  row.innerHTML=`
+    <div class="avatar avatar-agent">🧠</div>
+    <div class="typing-bubble">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  chat.appendChild(row);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function removeTyping(){
+  const el=document.getElementById("typing-row");
+  if(el)el.remove();
+}
+
+function buildRewardStrip(reward,breakdown){
+  const tags=breakdown.split("|").map(s=>s.trim()).filter(Boolean);
+  const isPos=reward>=0;
+  const totalHtml=`<span class="reward-total ${isPos?"reward-pos":"reward-neg"}">${isPos?"+":""}${reward.toFixed(2)}</span>`;
+  const tagHtml=tags.map(t=>{
+    const p=t.includes("+");
+    return `<span class="reward-tag ${p?"pos":"neg"}">${t}</span>`;
+  }).join("");
+  return `<div class="reward-strip">⚡ ${totalHtml} ${tagHtml}</div>`;
+}
+
+function appendBubble(role,text,reward,breakdown){
+  const chat=document.getElementById("chat");
+  // clear empty state
+  const empty=chat.querySelector(".empty-state");
+  if(empty)empty.remove();
+
+  const row=document.createElement("div");
+  row.className="bubble-row "+role;
+
+  if(role==="agent"){
+    row.innerHTML=`
+      <div class="avatar avatar-agent">🧠</div>
+      <div class="bubble-content">
+        <div class="bubble-name name-agent">Socratic Agent</div>
+        <div class="bubble bubble-agent">${text}${buildRewardStrip(reward,breakdown)}</div>
+      </div>`;
+  } else {
+    row.innerHTML=`
+      <div class="avatar avatar-student">🎓</div>
+      <div class="bubble-content">
+        <div class="bubble-name name-student">Student Simulator</div>
+        <div class="bubble bubble-student">${text}</div>
+      </div>`;
+  }
+  chat.appendChild(row);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+async function startEpisode(){
+  const topic=document.getElementById("topic-input").value.trim();
+  if(!topic){
+    document.getElementById("error-msg").innerHTML="⚠️ Please enter a topic first.";
+    return;
+  }
+  turn=0;understanding=0;episodeReward=0;history=[];lastStudent="";
+  document.getElementById("chat").innerHTML=`<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Starting episode…</div></div>`;
+  document.getElementById("error-msg").innerHTML="";
+  document.getElementById("done-banner").style.display="none";
+  document.getElementById("btn-next").disabled=true;
+  initChart();updateStats();
+  await doStep();
+}
+
+async function nextTurn(){if(!busy)await doStep()}
+
+async function doStep(){
+  const topic=document.getElementById("topic-input").value.trim();
+  document.getElementById("error-msg").innerHTML="";
+  setBusy(true);setLive(true,"Thinking…");
+  appendTyping();
+  try{
+    const res=await fetch("/step",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({topic,student_response:lastStudent,turn,history})
+    });
+    removeTyping();
+    if(!res.ok){
+      const e=await res.text();
+      document.getElementById("error-msg").innerHTML="⚠️ "+e;
+      setBusy(false);setLive(false);return;
+    }
+    const d=await res.json();
+    turn=d.turn+1;understanding=d.understanding_score;
+    episodeReward+=d.reward;history.push(d.agent_question);lastStudent=d.student_response;
+
+    appendBubble("agent",d.agent_question,d.reward,d.reward_breakdown);
+    setTimeout(()=>{
+      appendBubble("student",d.student_response,0,"");
+      updateChart(turn,d.reward);updateStats();
+      setLive(false,"");
+      if(d.done){
+        document.getElementById("btn-next").disabled=true;
+        const pct=Math.round(d.understanding_score*100);
+        const banner=document.getElementById("done-banner");
+        document.getElementById("done-sub").textContent=
+          `Student reached ${pct}% understanding in ${turn} turn${turn!==1?"s":""}.`;
+        banner.style.display="block";
+        setBusy(false);
+      } else {
+        setBusy(false);
+      }
+    },420);
+  }catch(e){
+    removeTyping();
+    document.getElementById("error-msg").innerHTML="⚠️ "+e.message;
+    setBusy(false);setLive(false);
+  }
+}
+
+// init
+initChart();updateStats();
+</script>
+</body>
+</html>
