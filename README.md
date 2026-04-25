@@ -106,6 +106,7 @@ Result: Student discovered the answer. Understanding: 0.94
 
 ## Architecture
 
+```text
 socratic-rl/
 ├── server/
 │   ├── environment.py     # SocraticEnvironment — reset(), step(), get_state()
@@ -122,6 +123,7 @@ socratic-rl/
 ├── dynamic_curriculum.py  # Snorkel AI sub-theme: adaptive scenario difficulty
 ├── train_grpo.ipynb       # Colab notebook — Unsloth + GRPO + W&B logging
 └── openenv.yaml           # OpenEnv manifest
+```
 
 ## Theme Alignment
 
