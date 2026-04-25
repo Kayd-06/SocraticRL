@@ -43,6 +43,8 @@ class SocraticEnvironment(Environment):
             conversation_history=[],
             max_turns=self.MAX_TURNS,
         )
+        # Snorkel-aligned curriculum state hint for adaptive schedulers.
+        self._state.difficulty_level = getattr(self._scenario, "difficulty", "medium")
         opening = (
             f"I'm stuck on this: {self._scenario.misconception} "
             "Can you help me think it through?"
@@ -78,11 +80,10 @@ class SocraticEnvironment(Environment):
             understanding_score=self._understanding,
             rng=self._rng,
         )
-        new_understanding = evaluate_understanding(
+        new_understanding = self._blend_understanding_scores(
             student_response=student_response,
-            scenario=self._scenario,
-            current_score=self._understanding,
             question=question,
+            current_score=self._understanding,
         )
         delta = max(new_understanding - self._understanding, 0.0)
         if delta > 0:
@@ -124,6 +125,60 @@ class SocraticEnvironment(Environment):
             topic=self._scenario.topic,
             feedback="|".join(feedback_parts),
         )
+
+    def _score_understanding_keyword(
+        self,
+        student_response: str,
+        question: str,
+        current_score: float,
+    ) -> float:
+        """Existing keyword scorer from simulator logic."""
+        return evaluate_understanding(
+            student_response=student_response,
+            scenario=self._scenario,
+            current_score=current_score,
+            question=question,
+        )
+
+    def _score_understanding_semantic(self, student_response: str) -> float:
+        """
+        Lightweight semantic scorer via TF-IDF cosine similarity.
+        Falls back to 0.0 when sklearn is unavailable.
+        """
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.metrics.pairwise import cosine_similarity
+        except ImportError:
+            if not getattr(self, "_warned_no_sklearn", False):
+                print(
+                    "[warning] sklearn not installed; falling back to keyword-only understanding score."
+                )
+                self._warned_no_sklearn = True
+            return 0.0
+
+        docs = [student_response or "", self._scenario.correct_answer or ""]
+        matrix = TfidfVectorizer().fit_transform(docs)
+        similarity = float(cosine_similarity(matrix[0:1], matrix[1:2])[0][0])
+        return max(0.0, min(similarity, 1.0))
+
+    def _blend_understanding_scores(
+        self,
+        student_response: str,
+        question: str,
+        current_score: float,
+    ) -> float:
+        keyword_score = self._score_understanding_keyword(
+            student_response=student_response,
+            question=question,
+            current_score=current_score,
+        )
+        tfidf_score = self._score_understanding_semantic(student_response)
+        if tfidf_score == 0.0 and not getattr(self, "_warned_no_sklearn", False):
+            # If semantic channel is truly 0, still preserve keyword signal.
+            blended = keyword_score
+        else:
+            blended = 0.60 * keyword_score + 0.40 * tfidf_score
+        return max(current_score, min(blended, 1.0))
 
     def get_state(self) -> SocraticState:
         return self._state
