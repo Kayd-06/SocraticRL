@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SocraticRL – AI That Teaches Through Questions</title>
+  <meta name="description" content="SocraticRL is a reinforcement learning environment where AI agents master the art of Socratic teaching — guiding students from misconception to understanding using only questions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ====== NAVBAR ====== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo" id="nav-logo">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8.5V19.5L14 26L2 19.5V8.5L14 2Z" fill="url(#logoGrad)" />
+            <path d="M14 8L9 11V17L14 20L19 17V11L14 8Z" fill="white" fill-opacity="0.3"/>
+            <circle cx="14" cy="14" r="2.5" fill="white"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7C3AED"/>
+                <stop offset="1" stop-color="#A855F7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">SocraticRL</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="#scenarios" class="nav-link">Scenarios</a></li>
+        <li><a href="#metrics" class="nav-link">Metrics</a></li>
+        <li><a href="#docs" class="nav-link">Docs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://github.com" class="nav-github" id="nav-github-btn" aria-label="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+        </a>
+        <a href="#docs" class="btn btn-outline" id="nav-docs-btn">Read Docs</a>
+        <a href="#demo" class="btn btn-primary" id="nav-demo-btn">Try Demo</a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-orb hero-orb-3"></div>
+      <div class="hero-grid"></div>
+    </div>
+
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge" id="hero-badge">
+          <span class="badge-dot"></span>
+          <span>Reinforcement Learning × Education</span>
+        </div>
+
+        <h1 class="hero-title" id="hero-title">
+          AI That Teaches<br/>
+          <span class="gradient-text">Through Questions</span><br/>
+          Not Answers
+        </h1>
+
+        <p class="hero-desc" id="hero-desc">
+          SocraticRL is an open-source RL environment where agents learn to guide students 
+          from <em>misconception to understanding</em> — using only Socratic questioning. 
+          Never direct answers.
+        </p>
+
+        <div class="hero-ctas" id="hero-ctas">
+          <a href="#demo" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Live Demo
+          </a>
+          <a href="https://github.com" class="btn btn-glass btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            View on GitHub
+          </a>
+        </div>
+
+        <div class="hero-stats" id="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value">15</span>
+            <span class="stat-label">Max Turns / Episode</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">90%</span>
+            <span class="stat-label">Understanding Threshold</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">∞</span>
+            <span class="stat-label">Training Scenarios</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual" id="hero-visual">
+        <!-- Floating conversation card -->
+        <div class="hero-card hero-card-main">
+          <div class="card-header">
+            <div class="card-avatar agent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/>
+              </svg>
+            </div>
+            <div class="card-who">
+              <span class="card-name">Socratic Agent</span>
+              <span class="card-role">RL-trained teacher</span>
+            </div>
+            <div class="card-status-dot"></div>
+          </div>
+          <div class="card-bubble agent-bubble">
+            "What do you think would happen if we removed air resistance from the equation entirely?"
+          </div>
+          <div class="card-bubble student-bubble">
+            "Hmm... maybe both objects would fall at the same rate? Like Galileo showed?"
+          </div>
+          <div class="understanding-bar">
+            <div class="ub-label">
+              <span>Understanding</span>
+              <span class="ub-value" id="ub-counter">0%</span>
+            </div>
+            <div class="ub-track">
+              <div class="ub-fill" id="ub-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating reward badge -->
+        <div class="floating-badge reward-badge">
+          <span class="fb-icon">⚡</span>
+          <div>
+            <div class="fb-title">Reward Signal</div>
+            <div class="fb-value">+1.247</div>
+          </div>
+        </div>
+
+        <!-- Floating topic chip -->
+        <div class="floating-badge topic-badge">
+          <span class="fb-icon">🧪</span>
+          <div>
+            <div class="fb-title">Current Topic</div>
+            <div class="fb-value">Physics · Gravity</div>
+          </div>
+        </div>
+
+        <!-- Turn counter -->
+        <div class="floating-badge turn-badge">
+          <div class="turn-ring">
+            <svg viewBox="0 0 36 36">
+              <circle class="turn-bg" cx="18" cy="18" r="15.9"/>
+              <circle class="turn-prog" cx="18" cy="18" r="15.9" stroke-dasharray="40 60"/>
+            </svg>
+            <span class="turn-num">6</span>
+          </div>
+          <div>
+            <div class="fb-title">Turn</div>
+            <div class="fb-value">of 15</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- ====== METRICS STRIP ====== -->
+  <section class="metrics-strip" id="metrics-strip">
+    <div class="container">
+      <div class="metrics-grid">
+        <div class="metric-card" id="metric-1">
+          <div class="metric-icon" style="background: linear-gradient(135deg, #7C3AED22, #7C3AED44)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-val">2.3×</span>
+            <span class="metric-txt">Faster Convergence vs. Baseline</span>
+          </div>
+        </div>
+        <div class="metric-card" id="metric-2">
+          <div class="metric-icon" style="background: linear-gradient(135deg, #059669aa, #10B98133)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-val">91.4%</span>
+            <span class="metric-txt">Episode Success Rate</span>
+          </div>
+        </div>
+        <div class="metric-card" id="metric-3">
+          <div class="metric-icon" style="background: linear-gradient(135deg, #F59E0B22, #F59E0B44)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-val">8.6</span>
+            <span class="metric-txt">Avg. Turns to Mastery</span>
+          </div>
+        </div>
+        <div class="metric-card" id="metric-4">
+          <div class="metric-icon" style="background: linear-gradient(135deg, #3B82F622, #3B82F644)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-val">100%</span>
+            <span class="metric-txt">Local — No API Calls</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FEATURES ====== -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Core Capabilities</div>
+        <h2 class="section-title">Everything you need to<br/><span class="gradient-text">train a Socratic AI</span></h2>
+        <p class="section-desc">A complete, self-contained RL environment — reward shaping, student simulation, progress tracking, and multi-topic scenarios, all without any external API calls.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card feature-card-large" id="feat-1">
+          <div class="feature-glow"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-purple">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <span class="feat-badge">Core</span>
+          </div>
+          <h3 class="feat-title">Socratic Questioning Engine</h3>
+          <p class="feat-desc">Agents learn to ask probing questions that guide students toward self-discovery. No direct answers allowed — only strategic Socratic dialogue.</p>
+          <div class="feat-demo">
+            <div class="demo-chat">
+              <div class="chat-msg agent-msg">
+                <span class="msg-dot agent-dot"></span>
+                "What would change if we removed gravity?"
+              </div>
+              <div class="chat-msg student-msg">
+                <span class="msg-dot student-dot"></span>
+                "Objects wouldn't accelerate toward Earth..."
+              </div>
+              <div class="chat-msg agent-msg">
+                <span class="msg-dot agent-dot"></span>
+                "And what does that tell us about Newton's Second Law?"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-card" id="feat-2">
+          <div class="feature-glow feat-glow-green"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="feat-title">Multi-Component Reward</h3>
+          <p class="feat-desc">Shaped rewards for questioning quality, topic relevance, student progress, efficiency, and terminal success — aligned with real pedagogical outcomes.</p>
+          <div class="reward-breakdown">
+            <div class="rb-row"><span>Question Quality</span><div class="rb-bar" style="width:82%"></div></div>
+            <div class="rb-row"><span>Topic Relevance</span><div class="rb-bar rb-bar-green" style="width:91%"></div></div>
+            <div class="rb-row"><span>Understanding Δ</span><div class="rb-bar rb-bar-yellow" style="width:68%"></div></div>
+            <div class="rb-row"><span>Efficiency Bonus</span><div class="rb-bar rb-bar-blue" style="width:55%"></div></div>
+          </div>
+        </div>
+
+        <div class="feature-card" id="feat-3">
+          <div class="feature-glow feat-glow-yellow"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-yellow">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="feat-title">Student Simulator</h3>
+          <p class="feat-desc">Realistic student profiles with unique misconceptions, knowledge levels, and response patterns. Local inference — no external model calls required.</p>
+          <div class="student-profiles">
+            <div class="sp-chip active">Maya · Visual Learner</div>
+            <div class="sp-chip">Jake · Overconfident</div>
+            <div class="sp-chip">Priya · Methodical</div>
+            <div class="sp-chip">Alex · Anxious</div>
+          </div>
+        </div>
+
+        <div class="feature-card" id="feat-4">
+          <div class="feature-glow feat-glow-blue"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="feat-title">Episode Management</h3>
+          <p class="feat-desc">Full episode lifecycle with UUID tracking, conversation history, state management, and automatic terminal condition detection at 90% understanding.</p>
+        </div>
+
+        <div class="feature-card" id="feat-5">
+          <div class="feature-glow feat-glow-pink"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-pink">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="feat-title">OpenEnv Compatible</h3>
+          <p class="feat-desc">Built on the OpenEnv standard interface. Drop-in integration with any RL framework — GRPO, PPO, or custom training loops via FastAPI.</p>
+        </div>
+
+        <div class="feature-card feature-card-highlight" id="feat-6">
+          <div class="feature-glow"></div>
+          <div class="feat-top">
+            <div class="feat-icon feat-icon-purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="feat-title">GRPO Training Ready</h3>
+          <p class="feat-desc">Includes a complete GRPO training notebook with reward shaping designed for modern LLM policy optimization out of the box.</p>
+          <a href="#" class="feat-link" id="feat-grpo-link">
+            View Training Notebook
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== HOW IT WORKS ====== -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">The Loop</div>
+        <h2 class="section-title">How <span class="gradient-text">SocraticRL</span> Works</h2>
+        <p class="section-desc">A closed-loop RL environment. The agent asks, the student responds, rewards flow, the agent learns — all locally, in real time.</p>
+      </div>
+
+      <div class="steps-container">
+        <div class="steps-line"></div>
+        <div class="step" id="step-1">
+          <div class="step-number">01</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.8">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <h3>Episode Reset</h3>
+            <p>A student scenario is randomly chosen — a student profile, topic, and misconception are loaded. The student opens with their confusion.</p>
+          </div>
+        </div>
+        <div class="step" id="step-2">
+          <div class="step-number">02</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.8">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+            <h3>Agent Questions</h3>
+            <p>The trained LLM agent generates a Socratic question — probing, not answering. Chain-of-thought reasoning is internal, never exposed to the student.</p>
+          </div>
+        </div>
+        <div class="step" id="step-3">
+          <div class="step-number">03</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.8">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <h3>Student Responds</h3>
+            <p>The local student simulator generates a realistic response based on current understanding, misconception, and the agent's question quality.</p>
+          </div>
+        </div>
+        <div class="step" id="step-4">
+          <div class="step-number">04</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.8">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>Reward Computed</h3>
+            <p>Multi-component reward: question quality, topic relevance, understanding delta, and terminal success bonus. Guides the agent toward optimal teaching strategies.</p>
+          </div>
+        </div>
+        <div class="step" id="step-5">
+          <div class="step-number">05</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <h3>Terminal or Continue</h3>
+            <p>Episode ends when understanding ≥ 90% or max turns reached. Efficiency bonus rewards agents who achieve mastery in fewer turns.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== SCENARIOS ====== -->
+  <section class="scenarios" id="scenarios">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Training Data</div>
+        <h2 class="section-title">Rich <span class="gradient-text">Scenario Library</span></h2>
+        <p class="section-desc">Pre-built training scenarios spanning physics, math, biology, and more — each with realistic student misconceptions for rigorous agent training.</p>
+      </div>
+
+      <div class="scenarios-grid">
+        <div class="scenario-card" id="sc-physics">
+          <div class="sc-header">
+            <div class="sc-emoji">⚛️</div>
+            <div class="sc-meta">
+              <span class="sc-subject">Physics</span>
+              <span class="sc-difficulty diff-medium">Medium</span>
+            </div>
+          </div>
+          <h3 class="sc-title">Gravity & Free Fall</h3>
+          <div class="sc-misconception">
+            <span class="mc-label">Misconception</span>
+            <p>"Heavier objects fall faster than lighter ones."</p>
+          </div>
+          <div class="sc-keywords">
+            <span class="kw-chip">vacuum</span>
+            <span class="kw-chip">acceleration</span>
+            <span class="kw-chip">galileo</span>
+            <span class="kw-chip">mass independence</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" id="sc-math">
+          <div class="sc-header">
+            <div class="sc-emoji">📐</div>
+            <div class="sc-meta">
+              <span class="sc-subject">Mathematics</span>
+              <span class="sc-difficulty diff-hard">Hard</span>
+            </div>
+          </div>
+          <h3 class="sc-title">Probability Basics</h3>
+          <div class="sc-misconception">
+            <span class="mc-label">Misconception</span>
+            <p>"After 5 tails in a row, heads is more likely next."</p>
+          </div>
+          <div class="sc-keywords">
+            <span class="kw-chip">independence</span>
+            <span class="kw-chip">gambler's fallacy</span>
+            <span class="kw-chip">sample space</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" id="sc-biology">
+          <div class="sc-header">
+            <div class="sc-emoji">🧬</div>
+            <div class="sc-meta">
+              <span class="sc-subject">Biology</span>
+              <span class="sc-difficulty diff-easy">Easy</span>
+            </div>
+          </div>
+          <h3 class="sc-title">Natural Selection</h3>
+          <div class="sc-misconception">
+            <span class="mc-label">Misconception</span>
+            <p>"Animals evolve traits they need on purpose."</p>
+          </div>
+          <div class="sc-keywords">
+            <span class="kw-chip">random mutation</span>
+            <span class="kw-chip">selection pressure</span>
+            <span class="kw-chip">fitness</span>
+          </div>
+        </div>
+
+        <div class="scenario-card scenario-card-add" id="sc-add">
+          <div class="sc-add-inner">
+            <div class="sc-add-icon">+</div>
+            <span>Add Your Scenario</span>
+            <p>Define custom student profiles, topics, misconceptions, and progress keywords.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== DEMO / CTA ====== -->
+  <section class="demo-cta" id="demo">
+    <div class="cta-bg">
+      <div class="cta-orb cta-orb-1"></div>
+      <div class="cta-orb cta-orb-2"></div>
+    </div>
+    <div class="container">
+      <div class="cta-inner">
+        <div class="cta-content">
+          <div class="section-tag">Get Started</div>
+          <h2 class="cta-title">Ready to train an AI<br/><span class="gradient-text">that actually teaches?</span></h2>
+          <p class="cta-desc">Install SocraticRL in minutes. Run locally with no API keys required — fully self-contained, fully open source.</p>
+          <div class="cta-install">
+            <div class="install-card" id="install-card">
+              <div class="install-header">
+                <span class="terminal-dot" style="background:#FF5F56"></span>
+                <span class="terminal-dot" style="background:#FFBD2E"></span>
+                <span class="terminal-dot" style="background:#27C93F"></span>
+                <span class="install-title">Terminal</span>
+              </div>
+              <div class="install-body">
+                <div class="install-line">
+                  <span class="prompt">$</span>
+                  <span class="cmd" id="cmd-1">git clone https://github.com/you/SocraticRL</span>
+                </div>
+                <div class="install-line">
+                  <span class="prompt">$</span>
+                  <span class="cmd" id="cmd-2">pip install -e .[dev]</span>
+                </div>
+                <div class="install-line">
+                  <span class="prompt">$</span>
+                  <span class="cmd" id="cmd-3">python server/environment.py</span>
+                </div>
+                <div class="install-output">
+                  <span class="out-green">✓ Episode ID: f4a82b1e-...</span><br/>
+                  <span class="out-green">✓ Final Understanding: 0.94</span><br/>
+                  <span class="out-green">✓ Success: true (8 turns)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-actions">
+          <a href="https://github.com" class="btn btn-primary btn-lg" id="cta-github-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            Star on GitHub
+          </a>
+          <a href="#docs" class="btn btn-glass btn-lg" id="cta-docs-btn">Read the Docs →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer" id="docs">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <div class="logo-icon">
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                <path d="M14 2L26 8.5V19.5L14 26L2 19.5V8.5L14 2Z" fill="url(#footerLogoGrad)" />
+                <path d="M14 8L9 11V17L14 20L19 17V11L14 8Z" fill="white" fill-opacity="0.3"/>
+                <circle cx="14" cy="14" r="2.5" fill="white"/>
+                <defs>
+                  <linearGradient id="footerLogoGrad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#7C3AED"/><stop offset="1" stop-color="#A855F7"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <span class="logo-text">SocraticRL</span>
+          </a>
+          <p class="footer-desc">An RL environment for training AI agents that teach through Socratic questioning. Open source. Local-first. Education-aligned.</p>
+          <div class="footer-tags">
+            <span class="ftag">#socratic</span>
+            <span class="ftag">#reinforcement-learning</span>
+            <span class="ftag">#education-ai</span>
+            <span class="ftag">#GRPO</span>
+          </div>
+        </div>
+
+        <div class="footer-links-group">
+          <h4>Project</h4>
+          <ul>
+            <li><a href="#">GitHub Repository</a></li>
+            <li><a href="#">Training Notebook</a></li>
+            <li><a href="#">OpenEnv Standard</a></li>
+            <li><a href="#">Scenarios Library</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-group">
+          <h4>Components</h4>
+          <ul>
+            <li><a href="#">Environment API</a></li>
+            <li><a href="#">Reward Function</a></li>
+            <li><a href="#">Student Simulator</a></li>
+            <li><a href="#">GRPO Training</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-group">
+          <h4>Tags</h4>
+          <ul>
+            <li><a href="#">Self-Improvement</a></li>
+            <li><a href="#">Education AI</a></li>
+            <li><a href="#">Multi-Turn RL</a></li>
+            <li><a href="#">Theme-4</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 SocraticRL. Open source under MIT License.</p>
+        <p>Built with ❤️ for the OpenEnv community.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
