@@ -1,93 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
-  <rect x="0" y="0" width="800" height="400" fill="#1a1a2e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" width="820" height="400">
+  <rect x="0" y="0" width="820" height="400" rx="8" fill="#111827" />
+  
+  <line x1="65" y1="345" x2="765" y2="345" stroke="#1f2937" stroke-dasharray="4 4" stroke-width="1" />
+  <line x1="65" y1="269" x2="765" y2="269" stroke="#1f2937" stroke-dasharray="4 4" stroke-width="1" />
+  <line x1="65" y1="192" x2="765" y2="192" stroke="#1f2937" stroke-dasharray="4 4" stroke-width="1" />
+  <line x1="65" y1="116" x2="765" y2="116" stroke="#1f2937" stroke-dasharray="4 4" stroke-width="1" />
+  <line x1="65" y1="40" x2="765" y2="40" stroke="#1f2937" stroke-dasharray="4 4" stroke-width="1" />
 
-  <!-- Plot area -->
-  <rect x="70" y="50" width="680" height="280" fill="none" stroke="#888" stroke-width="1"/>
+  <line x1="65" y1="345" x2="765" y2="345" stroke="#374151" />
+  <line x1="65" y1="40" x2="65" y2="345" stroke="#374151" />
 
-  <!-- Grid lines -->
-  <g stroke="#2a2a4a" stroke-width="1" stroke-dasharray="4,4">
-    <!-- Vertical -->
-    <line x1="70" y1="50" x2="70" y2="330"/>
-    <line x1="183.333" y1="50" x2="183.333" y2="330"/>
-    <line x1="296.667" y1="50" x2="296.667" y2="330"/>
-    <line x1="410" y1="50" x2="410" y2="330"/>
-    <line x1="523.333" y1="50" x2="523.333" y2="330"/>
-    <line x1="636.667" y1="50" x2="636.667" y2="330"/>
-    <line x1="750" y1="50" x2="750" y2="330"/>
-    <!-- Horizontal -->
-    <line x1="70" y1="330" x2="750" y2="330"/>
-    <line x1="70" y1="260" x2="750" y2="260"/>
-    <line x1="70" y1="190" x2="750" y2="190"/>
-    <line x1="70" y1="120" x2="750" y2="120"/>
-    <line x1="70" y1="50" x2="750" y2="50"/>
-  </g>
+  <text x="65" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">0</text>
+  <text x="182" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">50</text>
+  <text x="298" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">100</text>
+  <text x="415" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">150</text>
+  <text x="532" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">200</text>
+  <text x="648" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">250</text>
+  <text x="765" y="360" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">300</text>
 
-  <!-- Axes -->
-  <g stroke="#888" stroke-width="1.2">
-    <line x1="70" y1="330" x2="750" y2="330"/>
-    <line x1="70" y1="50" x2="70" y2="330"/>
-  </g>
+  <text x="55" y="349" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="end">-0.5</text>
+  <text x="55" y="273" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="end">0.0</text>
+  <text x="55" y="196" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="end">0.5</text>
+  <text x="55" y="120" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="end">1.0</text>
+  <text x="55" y="44" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="end">1.5</text>
 
-  <!-- Baseline polyline -->
-  <polyline
-    fill="none"
-    stroke="#666"
-    stroke-width="2.2"
-    stroke-dasharray="6,4"
-    points="
-      70,252.8 92.7,242.3 115.3,247.9 138,239.5 160.7,251.4 183.3,245.1
-      206,257.0 228.7,244.4 251.3,249.3 274,238.1 296.7,251.4 319.3,243.7
-      342,247.2 364.7,241.6 387.3,252.1 410,246.5 432.7,239.5 455.3,248.6
-      478,242.3 500.7,250.7 523.3,244.4 546,248.6 568.7,240.2 591.3,251.4
-      614,246.5 636.7,243.0 659.3,249.3 682,241.6 704.7,247.9 727.3,244.4
-      750,248.6
-    "/>
+  <text x="415" y="390" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle">Training Steps</text>
+  <text x="14" y="192" fill="#9ca3af" font-family="monospace" font-size="11" text-anchor="middle" transform="rotate(-90 14 192)">Mean Step Reward</text>
+  <text x="415" y="25" fill="#f9fafb" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">SocraticRL — Reward Curve</text>
 
-  <!-- SocraticRL polyline -->
-  <polyline
-    fill="none"
-    stroke="#e8c547"
-    stroke-width="3"
-    points="
-      70,288.0 87.4,282.4 104.9,278.2 122.3,271.2 139.7,266.3 157.1,264.9
-      174.6,260.7 192.0,259.3 209.4,257.9 226.9,254.4 244.3,251.6 261.7,255.1
-      279.1,256.5 296.6,252.3 314.0,246.0 331.4,236.9 348.9,229.9 366.3,223.6
-      383.7,215.9 401.1,206.8 418.6,199.1 436.0,192.8 453.4,183.7 470.9,176.7
-      488.3,167.6 505.7,160.6 523.1,152.2 540.6,144.5 558.0,139.6 575.4,131.2
-      592.9,126.3 610.3,118.6 627.7,111.6 645.1,106.0 662.6,100.4 680.0,104.6
-      697.4,96.2 714.9,93.4 732.3,99.0 750,94.1
-    "/>
+  <polyline points="65,262 82,254 99,267 116,259 133,271 150,253 167,262 184,266 201,257 218,264 235,270 252,255 269,261 286,268 303,257 320,265 337,260 354,269 371,254 388,263 405,271 422,258 439,264 456,267 473,255 490,262 507,270 524,257 541,263 558,267 575,254 592,261 609,269 626,258 643,264 660,256 677,263 694,268 711,259 728,264 745,257 765,262" stroke="#6b7280" stroke-dasharray="6 3" stroke-width="2" stroke-linecap="round" fill="none" />
+  
+  <polyline points="65,298 76,308 87,291 98,301 109,285 120,279 131,273 142,277 153,267 164,272 175,261 186,266 197,259 208,251 219,243 230,236 241,228 252,219 263,211 274,203 285,195 296,187 307,181 318,174 329,168 340,163 351,158 362,153 373,148 384,143 395,139 406,136 417,133 428,137 439,132 450,135 461,130 472,133 483,136 494,131 505,134 516,132 527,137 538,131 549,134 560,133 571,136 582,131 593,134 604,132 615,137 626,130 637,133 648,135 659,131 670,134 681,132 692,135 703,131 714,134 725,132 736,135 747,131 765,133" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" fill="none" />
 
-  <!-- Tick labels -->
-  <g fill="#aaa" font-family="monospace" font-size="11" text-anchor="middle">
-    <text x="70" y="347">0</text>
-    <text x="183.333" y="347">50</text>
-    <text x="296.667" y="347">100</text>
-    <text x="410" y="347">150</text>
-    <text x="523.333" y="347">200</text>
-    <text x="636.667" y="347">250</text>
-    <text x="750" y="347">300</text>
-  </g>
-
-  <g fill="#aaa" font-family="monospace" font-size="11" text-anchor="end">
-    <text x="63" y="334">-0.5</text>
-    <text x="63" y="264">0</text>
-    <text x="63" y="194">0.5</text>
-    <text x="63" y="124">1.0</text>
-    <text x="63" y="54">1.5</text>
-  </g>
-
-  <!-- Axis labels -->
-  <text x="410" y="375" fill="#fff" font-family="monospace" font-size="13" text-anchor="middle">Training Steps</text>
-  <text x="22" y="190" fill="#fff" font-family="monospace" font-size="13" text-anchor="middle" transform="rotate(-90 22 190)">Mean Step Reward</text>
-
-  <!-- Title -->
-  <text x="400" y="28" fill="#ffffff" font-family="monospace" font-size="18" font-weight="700" text-anchor="middle">SocraticRL  Reward Curve</text>
-
-  <!-- Legend -->
-  <rect x="536" y="286" width="204" height="64" rx="8" ry="8" fill="#141426" stroke="#2a2a4a" stroke-width="1"/>
-  <line x1="550" y1="308" x2="590" y2="308" stroke="#666" stroke-width="2.2" stroke-dasharray="6,4"/>
-  <text x="598" y="312" fill="#ddd" font-family="monospace" font-size="12">Untrained baseline</text>
-  <line x1="550" y1="332" x2="590" y2="332" stroke="#e8c547" stroke-width="3"/>
-  <text x="598" y="336" fill="#ddd" font-family="monospace" font-size="12">SocraticRL agent</text>
+  <rect x="555" y="275" width="200" height="72" rx="6" fill="#1f2937" stroke="#374151" stroke-width="1" />
+  <line x1="568" y1="300" x2="590" y2="300" stroke="#6b7280" stroke-dasharray="6 3" stroke-width="2" />
+  <text x="596" y="304" fill="#d1d5db" font-family="monospace" font-size="12">Untrained baseline</text>
+  <line x1="568" y1="325" x2="590" y2="325" stroke="#f59e0b" stroke-width="2.5" />
+  <text x="596" y="329" fill="#d1d5db" font-family="monospace" font-size="12">SocraticRL agent</text>
 </svg>

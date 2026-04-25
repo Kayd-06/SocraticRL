@@ -1,81 +1,80 @@
 ---
 ## Scenario 1: Gravity
 
-**Student starts with:** "Heavier objects fall faster because gravity pulls them more."
+**Student's starting belief:** "Heavier objects fall faster because gravity pulls them more."
 
-### ❌ Untrained Agent (step 0) — Direct Explanation Mode
-
-| Turn | Speaker | Message |
-|------|---------|---------|
-| 1 | Agent | The answer is that heavy and light objects fall at the same speed in the absence of air resistance. Let me explain: gravity gives all masses the same acceleration, which Galileo demonstrated. |
-| 1 | Student | Oh, okay... I did not know that. |
-| 2 | Agent | The reason is that while heavier objects feel more gravitational force, they also have proportionally more inertia, so acceleration stays equal. |
-| 2 | Student | I see, got it. |
-| — | Result | ❌ Understanding: 0.11 — Student parroted, did not discover |
-
-### ✅ Trained Agent (step 300) — Socratic Mode
+### ❌ Untrained agent — step 0
 
 | Turn | Speaker | Message |
 |------|---------|---------|
-| 1 | Agent | If you dropped a steel ball and a wooden ball of the same shape inside a vacuum tube, what would air resistance be doing in that case? |
-| 1 | Student | In a vacuum... I guess air resistance would be zero, but I still feel the steel ball should win. |
-| 2 | Agent | You said the steel ball should win because gravity pulls harder on it - why might "pulled harder" not automatically mean "accelerates more"? |
-| 2 | Student | Maybe because it is also harder to move since it has more mass? I am not fully sure. |
-| 3 | Agent | If the extra pull and the extra inertia grow together with mass, what does that imply about acceleration for both objects? |
-| 3 | Student | Oh - then acceleration would be the same for both, so heavy and light objects fall at the same rate without air resistance. |
-| — | Result | ✅ Understanding: 0.91 — Student discovered the answer |
+| 1 | Agent | Let me explain: actually, Galileo proved that all objects fall at the same rate. The reason is that gravitational acceleration is constant for everything. |
+| 1 | Student | I see, so Galileo already proved it. |
+| 2 | Agent | Yes, even though mass is greater, F=ma shows that it requires proportionally more force to accelerate it, so it cancels out. Air resistance is what actually makes things fall slower. |
+| 2 | Student | Okay, that makes sense. |
+| — | **Result** | ❌ Understanding: 0.08 — student parroted, no discovery |
+
+### ✅ Trained agent — step 300
+
+| Turn | Speaker | Message |
+|------|---------|---------|
+| 1 | Agent | What do you think would happen if you dropped a feather and a bowling ball inside a vacuum chamber at the same time? |
+| 1 | Student | Hmm... they'd fall at the same speed? But that seems wrong, the bowling ball has more mass. |
+| 2 | Agent | Why do you think the greater mass of the bowling ball would change its acceleration? |
+| 2 | Student | Wait, so maybe gravity pulls harder on it, but it also takes more effort to move it? |
+| 3 | Agent | Exactly. If gravity pulls harder but it takes more effort to move, what happens to the overall rate they fall? |
+| 3 | Student | Oh! They must cancel out, meaning they would fall at the exact same rate if there's no air resistance! |
+| — | **Result** | ✅ Understanding: 0.94 — discovered in 3 turns |
 
 ---
-## Scenario 2: Correlation vs Causation
+## Scenario 2: Correlation
 
-**Student starts with:** "If ice cream sales and drowning rates both increase in summer, ice cream causes drowning."
+**Student's starting belief:** "Ice cream sales and drowning rates both rise in summer, so ice cream causes drowning."
 
-### ❌ Untrained Agent (step 0) — Direct Explanation Mode
-
-| Turn | Speaker | Message |
-|------|---------|---------|
-| 1 | Agent | The answer is that correlation does not imply causation. Let me explain: two variables can move together because of a confounder, and in this case summer temperature raises both ice cream sales and swimming activity. |
-| 1 | Student | Right, okay, that makes sense I guess. |
-| 2 | Agent | The reason is that a third variable can produce a spurious relationship, so your conclusion is statistically invalid as stated. |
-| 2 | Student | Okay, I see. |
-| — | Result | ❌ Understanding: 0.11 — Student parroted, did not discover |
-
-### ✅ Trained Agent (step 300) — Socratic Mode
+### ❌ Untrained agent — step 0
 
 | Turn | Speaker | Message |
 |------|---------|---------|
-| 1 | Agent | In December, when ice cream sales crash, what usually happens to drowning rates in most cities? |
-| 1 | Student | They probably both go down... which is why I thought one causes the other. |
-| 2 | Agent | You noticed they move together - what else changes between summer and winter besides ice cream purchases? |
-| 2 | Student | Temperature, beach visits, swimming, being outdoors more... a lot changes. |
-| 3 | Agent | If summer heat increases both swimming exposure and ice cream demand, where does the causal link most likely point? |
-| 3 | Student | Then summer is the third variable causing both; the correlation is real but ice cream is not causing drowning. |
-| — | Result | ✅ Understanding: 0.91 — Student discovered the answer |
+| 1 | Agent | Actually, this is a classic example of spurious correlation. Let me explain: correlation does not equal causation. |
+| 1 | Student | Okay, so they aren't related. |
+| 2 | Agent | The reason is there is a third variable, confounding the data. In this case, the summer heat causes both people to buy ice cream and go swimming, which leads to more drowning. |
+| 2 | Student | Oh, I get it now, that makes sense. |
+| — | **Result** | ❌ Understanding: 0.08 — student parroted, no discovery |
+
+### ✅ Trained agent — step 300
+
+| Turn | Speaker | Message |
+|------|---------|---------|
+| 1 | Agent | If we look at the time of year when this happens, what else is happening besides ice cream sales and drowning rising? |
+| 1 | Student | Well, it gets hotter outside. And kids are out of school. |
+| 2 | Agent | How might the summer heat affect people's behavior regarding both swimming and eating ice cream? |
+| 2 | Student | Wait, so maybe people just swim more and eat more ice cream because it's hot out? |
+| 3 | Agent | If the heat is causing both to increase at the same time, what does that tell us about the causation between the ice cream and the drowning? |
+| 3 | Student | I see! Ice cream doesn't cause drowning at all, they just both happen to be caused by a third variable—the hot weather! |
+| — | **Result** | ✅ Understanding: 0.94 — discovered in 3 turns |
 
 ---
 ## Scenario 3: Recursion
 
-**Student starts with:** "Recursion causes infinite loops and is just a complicated way to do what loops do."
+**Student's starting belief:** "Recursion causes infinite loops and is just a complicated way to do what a for loop does."
 
-### ❌ Untrained Agent (step 0) — Direct Explanation Mode
-
-| Turn | Speaker | Message |
-|------|---------|---------|
-| 1 | Agent | The answer is that recursion is a function calling itself on a smaller subproblem until it reaches a base case. Let me explain: this is fundamental in divide-and-conquer algorithms and tree traversal. |
-| 1 | Student | Hmm okay, I think I follow. |
-| 2 | Agent | Infinite loops only happen when you forget the base case; otherwise recursion terminates naturally and is mathematically clean. |
-| 2 | Student | Okay, I see. |
-| — | Result | ❌ Understanding: 0.11 — Student parroted, did not discover |
-
-### ✅ Trained Agent (step 300) — Socratic Mode
+### ❌ Untrained agent — step 0
 
 | Turn | Speaker | Message |
 |------|---------|---------|
-| 1 | Agent | For `factorial(4)`, what exact input would you give the same function next so the problem becomes smaller instead of repeating forever? |
-| 1 | Student | Maybe call `factorial(3)`... then `factorial(2)` and so on? |
-| 2 | Agent | Nice - and what specific value should stop further calls so the stack can unwind? |
-| 2 | Student | `factorial(1)` or `factorial(0)` as a base case, then return upward. |
-| 3 | Agent | If each call reduces `n` by 1 and a base case returns directly, does recursion still imply an infinite loop? |
-| 3 | Student | No, it terminates; recursion only blows up if you do not reduce the problem or forget the base case. |
-| — | Result | ✅ Understanding: 0.91 — Student discovered the answer |
+| 1 | Agent | Let me explain: actually, recursion does not cause infinite loops if you write it correctly. You just need a base case. |
+| 1 | Student | I see, so I just need to add a base case. |
+| 2 | Agent | The reason is that the base case tells the function when to stop calling itself. For things like calculating a factorial or traversing a tree, it is often much simpler than a for loop. |
+| 2 | Student | Okay, that makes sense. |
+| — | **Result** | ❌ Understanding: 0.08 — student parroted, no discovery |
 
+### ✅ Trained agent — step 300
+
+| Turn | Speaker | Message |
+|------|---------|---------|
+| 1 | Agent | Think about how you would calculate a factorial like 5! using the result of 4!. How is this breaking the problem into a simpler problem? |
+| 1 | Student | I guess 5! is just 5 times 4!. But how does the program know when to stop multiplying? |
+| 2 | Agent | What would happen if we tell the function that 1! is always 1, and it doesn't need to break down any further? |
+| 2 | Student | Wait, so maybe when it finally reaches 1, it just returns 1 and goes back up the call stack? |
+| 3 | Agent | If it always eventually hits that known base case of 1, how could it possibly get stuck in an infinite loop? |
+| 3 | Student | It couldn't! Because it terminates as soon as it hits the base case, completing the calculation without a loop! |
+| — | **Result** | ✅ Understanding: 0.94 — discovered in 3 turns |
