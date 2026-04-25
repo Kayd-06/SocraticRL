@@ -1,0 +1,16 @@
+name: socratic-rl
+version: 0.1.0
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+description: >
+  RL environment where an LLM agent learns to teach through Socratic questioning.
+  The agent must guide a simulated student from misconception to understanding
+  using only questions - never direct answers. Local student simulator, no API calls.
+tags:
+  - self-improvement
+  - education
+  - socratic
+  - multi-turn
+  - theme-4
