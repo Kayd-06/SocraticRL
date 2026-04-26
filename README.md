@@ -15,7 +15,7 @@ instead of teaching fishing.
 
 Socrates never answered a question directly. He asked questions until his
 students discovered truth themselves. That capability — knowing which question
-to ask next — is not in any base model. It must be learned.
+to ask next - is not in any base model. It must be learned.
 
 ## What We Built
 
