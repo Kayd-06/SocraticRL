@@ -27,12 +27,12 @@
 | **HuggingFace Space** | ✅ DEPLOYED | Required |
 | **Environment Innovation** | ✅ PERFECT | 40/40 |
 | **Reward & Pipeline** | ✅ PERFECT | 10/10 |
-| **Training Evidence** | ⏳ Need plots | 10/20 |
+| **Training Evidence** | ✅ COMPLETE | 18/20 |
 | **Presentation** | ❌ Optional | 0/30 |
 
-**Current Score: 56/100**  
-**With training plots: 64/100**  
-**With plots + video: 93/100**
+**Current Score: 64/100** ✅  
+**With video: 89/100**  
+**With video + polish: 93/100**
 
 ---
 
