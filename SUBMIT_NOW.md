@@ -42,7 +42,7 @@ Snorkel AI - Changing Requirements (Dynamic Curriculum)
 
 ### 7. Additional Links (OPTIONAL)
 ```
-Trained Model: https://huggingface.co/codeqd/socratic-tutor-v2
+Trained Model: https://huggingface.co/aneek2007/socratic-rl-agent
 WandB Training Run: https://wandb.ai/aneek22112007-tech/socratic-rl-training
 Training Notebook: https://github.com/aneek22112007-tech/SocraticRL/blob/main/train_fixed_final.ipynb
 ```

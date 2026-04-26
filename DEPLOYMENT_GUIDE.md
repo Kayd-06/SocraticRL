@@ -60,7 +60,7 @@ curl https://aneek22112007-tech-socratic-rl.hf.space/health
 
 Replace in README.md:
 - Space URL: https://huggingface.co/spaces/aneek22112007-tech/socratic-rl
-- Model URL: https://huggingface.co/aneek22112007-tech/socratic-rl-agent
+- Model URL: https://huggingface.co/aneek2007/socratic-rl-agent
 - WandB URL: (get from your training run)
 
 ## Troubleshooting

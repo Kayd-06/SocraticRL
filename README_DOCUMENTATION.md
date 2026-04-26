@@ -474,7 +474,7 @@ Interpretation:
 | Resource | URL |
 |----------|-----|
 | GitHub Repository | https://github.com/aneek22112007-tech/SocraticRL |
-| HuggingFace Model | https://huggingface.co/aneek22112007-tech/socratic-rl-agent |
+| HuggingFace Model | https://huggingface.co/aneek2007/socratic-rl-agent |
 | Training Dashboard | https://wandb.ai/aneek22112007-tech/socratic-rl-training |
 | HuggingFace Space | https://huggingface.co/spaces/aneek22112007-tech/socratic-rl |
 

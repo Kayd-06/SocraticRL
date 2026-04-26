@@ -92,7 +92,7 @@ through questions instead of giving direct answers.
 
 **Additional Links**:
 ```
-Model: https://huggingface.co/codeqd/socratic-tutor-v2
+Model: https://huggingface.co/aneek2007/socratic-rl-agent
 WandB: https://wandb.ai/aneek22112007-tech/socratic-rl-training
 ```
 

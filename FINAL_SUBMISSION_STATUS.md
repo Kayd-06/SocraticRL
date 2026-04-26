@@ -31,7 +31,7 @@
 - **Platform**: Google Colab (free T4 GPU)
 - **Framework**: Hugging Face TRL with GRPO
 - **Status**: Completed successfully, model trained and pushed to Hub
-- **Model URL**: https://huggingface.co/codeqd/socratic-tutor-v2
+- **Model URL**: https://huggingface.co/aneek2007/socratic-rl-agent
 
 ### 3. Training Evidence (REQUIRED) ✅
 - **Loss Plot**: `results/training_loss.png` ✅
@@ -249,7 +249,7 @@ Presentation:            25/30 = 25.0 points ✅
 5. **Video URL**: [Add if you create video]
 6. **Blog Post**: [Add if you create HF blog]
 7. **Additional Links**: 
-   - Trained Model: https://huggingface.co/codeqd/socratic-tutor-v2
+   - Trained Model: https://huggingface.co/aneek2007/socratic-rl-agent
    - WandB Run: https://wandb.ai/aneek22112007-tech/socratic-rl-training
 
 ---
