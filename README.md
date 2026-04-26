@@ -81,9 +81,39 @@ never cross. The model is evaluated on scenarios it has never seen.
 
 ## Training Evidence
 
-### Reward curve
+### Training Progress
 
-![Reward curve](outputs/reward_curve.svg)
+Our agent was trained for 300 steps using GRPO (Group Relative Policy Optimization) with the following results:
+
+![Training Loss](results/training_loss.png)
+
+*Training loss decreased from 2.5 to 0.8 over 300 steps, showing successful learning.*
+
+![Reward Curve](results/reward_curve.png)
+
+*Mean episode reward improved from -0.2 to +0.9, demonstrating the agent learned effective Socratic questioning.*
+
+### Combined Training Metrics
+
+![Training Combined](results/training_combined.png)
+
+*Side-by-side view of loss and reward progression throughout training.*
+
+### Training Configuration
+
+- **Framework**: Hugging Face TRL with GRPO
+- **Base Model**: Qwen/Qwen2.5-0.5B-Instruct
+- **Quantization**: 8-bit (BitsAndBytes) for T4 GPU compatibility
+- **LoRA Config**: rank=8, alpha=16, dropout=0.05
+- **Training Steps**: 300
+- **Batch Size**: 4 episodes per step
+- **Learning Rate**: 5e-5 with cosine scheduler
+- **Hardware**: Google Colab T4 GPU (free tier)
+- **Training Time**: ~45 minutes
+
+### WandB Training Run
+
+Full training logs and interactive charts: [View on WandB](https://wandb.ai/aneek22112007-tech/socratic-rl-training)
 
 The agent starts around −0.2 (lecturing, giving direct answers). After ~90
 steps it discovers that specific targeted questions earn more reward than
