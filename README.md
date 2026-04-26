@@ -1,5 +1,3 @@
----
-
 # SocraticRL 🦉
 
 > We trained an LLM to think like Socrates — it teaches without ever giving the answer.
