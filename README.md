@@ -1,6 +1,6 @@
 # SocraticRL 🦉
 
-> We trained an LLM to think like Socrates — it teaches without ever giving the answer.
+> We trained an LLM to think like Socrates - it teaches without ever giving the answer.
 
 [![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-Live%20Demo-blue)](https://huggingface.co/spaces/aneek2007/socratic-rl)
 [![Model](https://img.shields.io/badge/🤗%20Hub-Trained%20Model-green)](https://huggingface.co/aneek2007/socratic-rl-agent)
@@ -40,7 +40,7 @@ Simulator:      updates student understanding based on question quality
 Repeat until:   understanding >= 0.9 or turn 15
 ```
 
-### Reward function — 7 components
+### Reward function - 7 components
 
 | Component | Condition | Reward |
 |---|---|---|
@@ -182,7 +182,7 @@ socratic-rl/
 ├── reward.py                  7-component reward, anti-hack, 7 unit tests
 ├── reward_analytics.py        Reward analysis & exploit detection tool
 ├── environment_benchmark.py   Performance benchmarking suite
-├── comprehensive_tests.py     77 automated tests (all passing ✅)
+├── comprehensive_tests.py     77 automated tests (all passing )
 ├── eval.py                    Held-out evaluation on EVAL_SCENARIOS only
 ├── client.py                  HTTPEnvClient for remote Space access
 ├── dynamic_curriculum.py      Adaptive difficulty — Snorkel AI sub-theme
@@ -206,18 +206,18 @@ student expert raises the bar as the agent demonstrates mastery.
 
 ## Testing & Quality Assurance
 
-### Comprehensive Test Suite (77 tests, all passing ✅)
+### Comprehensive Test Suite (77 tests, all passing )
 
 ```bash
 python comprehensive_tests.py
 ```
 
 Tests cover:
-- ✅ Reward function correctness (5 tests)
-- ✅ Environment behavior (7 tests)
-- ✅ Student simulator (4 tests)
-- ✅ Scenario data quality (57 tests)
-- ✅ Full integration (4 tests)
+-  Reward function correctness (5 tests)
+-  Environment behavior (7 tests)
+-  Student simulator (4 tests)
+-  Scenario data quality (57 tests)
+-  Full integration (4 tests)
 
 ### Reward Analytics & Exploit Detection
 
