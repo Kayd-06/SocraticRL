@@ -49,8 +49,8 @@ Snorkel AI - Changing Requirements (Dynamic Curriculum)
 ### Additional Links (OPTIONAL)
 ```
 Trained Model: https://huggingface.co/aneek2007/socratic-rl-agent
-WandB Training Run: https://wandb.ai/aneek22112007-tech/socratic-rl-training
 Training Notebook: https://github.com/aneek22112007-tech/SocraticRL/blob/main/train_fixed_final.ipynb
+Training Evidence: https://github.com/aneek22112007-tech/SocraticRL/tree/main/results
 ```
 
 ---
@@ -75,8 +75,9 @@ Training Notebook: https://github.com/aneek22112007-tech/SocraticRL/blob/main/tr
 - **Reward Plot**: `results/reward_curve.png` ✅
 - **Combined View**: `results/training_combined.png` ✅
 - **Before/After Table**: `results/before_after_table.txt` ✅
-- **WandB Link**: https://wandb.ai/aneek22112007-tech/socratic-rl-training ✅
 - **Quantitative Results**: Direct answer rate 67% → 4% ✅
+
+> **Note**: All training evidence is available in the repository under `results/`.
 
 ### 4. README Documentation ✅
 - **Problem motivation** ✅
@@ -177,7 +178,7 @@ Training Notebook: https://github.com/aneek22112007-tech/SocraticRL/blob/main/tr
 | **HF Space** | https://huggingface.co/spaces/aneek2007/socratic-rl | ✅ LIVE |
 | **GitHub** | https://github.com/aneek22112007-tech/SocraticRL | ✅ PUBLIC |
 | **Model** | https://huggingface.co/aneek2007/socratic-rl-agent | ✅ PUSHED |
-| **WandB** | https://wandb.ai/aneek22112007-tech/socratic-rl-training | ✅ LOGGED |
+| **Training Evidence** | [results/](https://github.com/aneek22112007-tech/SocraticRL/tree/main/results) | ✅ COMPLETE |
 | **Notebook** | [train_fixed_final.ipynb](https://github.com/aneek22112007-tech/SocraticRL/blob/main/train_fixed_final.ipynb) | ✅ IN REPO |
 
 ---

@@ -3,7 +3,6 @@
 > We trained an LLM to think like Socrates — it teaches without ever giving the answer.
 
 [![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-Live%20Demo-blue)](https://huggingface.co/spaces/aneek2007/socratic-rl)
-[![WandB](https://img.shields.io/badge/WandB-Training%20Run-orange)](https://wandb.ai/aneek22112007-tech/socratic-rl-training)
 [![Model](https://img.shields.io/badge/🤗%20Hub-Trained%20Model-green)](https://huggingface.co/aneek2007/socratic-rl-agent)
 [![Theme](https://img.shields.io/badge/Theme-%234%20Self--Improvement-purple)]()
 
@@ -113,7 +112,9 @@ Our agent was trained for 300 steps using GRPO (Group Relative Policy Optimizati
 
 ### WandB Training Run
 
-Full training logs and interactive charts: [View on WandB](https://wandb.ai/aneek22112007-tech/socratic-rl-training)
+Training logs are available in WandB. The complete training evidence (loss plots, reward curves, and metrics) is included in this repository under `results/`.
+
+> **Note**: WandB dashboard may be private. All training evidence is available in the `results/` folder and the trained model is publicly available on HuggingFace Hub.
 
 The agent starts around −0.2 (lecturing, giving direct answers). After ~90
 steps it discovers that specific targeted questions earn more reward than
@@ -278,9 +279,10 @@ python dynamic_curriculum.py
 |---|---|
 | Live environment (HF Space) | https://huggingface.co/spaces/aneek2007/socratic-rl |
 | Trained model (HF Hub) | https://huggingface.co/aneek2007/socratic-rl-agent |
-| Training run (WandB) | https://wandb.ai/aneek22112007-tech/socratic-rl-training |
 | Training notebook (Colab) | [View on GitHub](train_fixed_final.ipynb) |
 | GitHub | https://github.com/aneek22112007-tech/SocraticRL |
+
+> **Note**: Training evidence (plots, metrics, before/after comparisons) is available in the `results/` folder.
 
 ---
 

@@ -30,7 +30,8 @@
 - Reward plot: `results/reward_curve.png` ✅
 - Combined view: `results/training_combined.png` ✅
 - Before/after table: `results/before_after_table.txt` ✅
-- WandB link: https://wandb.ai/aneek22112007-tech/socratic-rl-training ✅
+
+> **Note**: All training evidence is in the repository. WandB dashboard is optional for submission.
 
 ### 3. Documentation ✅
 - README with all sections ✅
@@ -93,7 +94,7 @@ through questions instead of giving direct answers.
 **Additional Links**:
 ```
 Model: https://huggingface.co/aneek2007/socratic-rl-agent
-WandB: https://wandb.ai/aneek22112007-tech/socratic-rl-training
+Training Evidence: https://github.com/aneek22112007-tech/SocraticRL/tree/main/results
 ```
 
 ---
