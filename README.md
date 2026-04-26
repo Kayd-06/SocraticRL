@@ -2,7 +2,7 @@
 
 > We trained an LLM to think like Socrates — it teaches without ever giving the answer.
 
-[![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-Live%20Demo-blue)](https://huggingface.co/spaces/aneek22112007-tech/socratic-rl)
+[![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-Live%20Demo-blue)](https://huggingface.co/spaces/aneek2007/socratic-rl)
 [![WandB](https://img.shields.io/badge/WandB-Training%20Run-orange)](https://wandb.ai/aneek22112007-tech/socratic-rl-training)
 [![Model](https://img.shields.io/badge/🤗%20Hub-Trained%20Model-green)](https://huggingface.co/aneek22112007-tech/socratic-rl-agent)
 [![Theme](https://img.shields.io/badge/Theme-%234%20Self--Improvement-purple)]()
@@ -246,7 +246,7 @@ python dynamic_curriculum.py
 
 | Resource | URL |
 |---|---|
-| Live environment (HF Space) | https://huggingface.co/spaces/aneek22112007-tech/socratic-rl |
+| Live environment (HF Space) | https://huggingface.co/spaces/aneek2007/socratic-rl |
 | Trained model (HF Hub) | https://huggingface.co/aneek22112007-tech/socratic-rl-agent |
 | Training run (WandB) | https://wandb.ai/aneek22112007-tech/socratic-rl-training |
 | Training notebook (Colab) | [View on GitHub](train_fixed_final.ipynb) |
